@@ -18,7 +18,7 @@ class Oscillator{
     Oscillator(){}
 
     void Setw(double w) {w_ = w;}
-    void SetTheta(double theta) {theta_ = theta;}
+    void SetTheta(double theta) {theta_ = theta;} //cambiare theta cambia automaticamente anche il fasore
     double Getw() {return w_;}
     double GetTheta() {return theta_;};
 
