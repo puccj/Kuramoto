@@ -1,27 +1,12 @@
 #include "oscillator.h"
 #include <vector>
 #include <random>
-#include <algorithm>
-#include <iostream>
 using namespace std::complex_literals;
 
 //int Oscillator::_N;  //numero di oscillatori
 //double Oscillator::_K; //parametro di accoppiamento
 
-int Oscillator::_gridDim = -1;
-
-Oscillator::Oscillator(double freq, double phase, int position): _freq{freq}, _position{position} {
-  if (_gridDim == -1) {
-    std::cerr << "WARN (11): _gridDim value not set: using default value. Use Oscillator::setGridDim static function if you want to set it manually\n";
-    setDefaultGridDim();
-  }
-  
-  if (position == -1) {   //default value -> random setting
-    std::random_device seed;
-    std::uniform_int_distribution<int> dist(0, _gridDim*_gridDim);
-    _position = dist(seed);
-  }
-
+Oscillator::Oscillator(double freq, double phase): _freq{freq} {
   if (freq == -1) {    
     std::random_device seed;
     double l1 = 1;
@@ -63,45 +48,4 @@ std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system
   double r = std::sqrt(x*x + y*y);   
   double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
   return std::polar(r, psi);  //polar costruisce un exp complesso, MF sta per mean field non per Matteo Falcioni
-}
-
-void Oscillator::print(std::vector<Oscillator> system) {
-  std::sort(system.begin(), system.end());
-  
-  for (int n = 0; n < _gridDim*_gridDim; n++) {
-    if (n % _gridDim == 0) {
-      if (n == 0)
-        std::cout << '\n';
-      else
-        std::cout << "|\n";
-      
-      for (int i = 0; i < _gridDim; i++)
-        std::cout << "----";
-      std::cout << '\n';
-    }
-
-    std::cout << "| ";
-    
-    bool present = false;
-    for(int i = 0; i < system.size(); i++) {
-      if (system[i].position() == n) {
-        system.erase(system.begin()+i);
-        present = true;
-        break;
-      }
-    }
-    if (present)
-      std::cout << "o ";
-    else
-      std::cout << "  ";
-  }
-
-  std::cout << "|\n";
-  for (int i = 0; i < _gridDim; i++) {
-    std::cout << "----";
-  }
-}
-
-bool operator<(Oscillator& lhs, Oscillator& rhs) {
-  return lhs.position() < rhs.position();
 }

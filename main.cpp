@@ -1,9 +1,9 @@
-#include "oscillator.h"
+#include "firefly.h"
 
 int main(){
-  int N = 10;
-  Oscillator::setGridDim(5);
-  std::vector<Oscillator> system(N);  //create an array of N oscillator (no parameter set -> random)
-  Oscillator::print(system);
+  int N = 5;
+  Firefly::setGridDim(5);
+  std::vector<Firefly> system(N);  //create an array of N Firefly (no parameter set -> random)
+  Firefly::print(system);
   
 }
