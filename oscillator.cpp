@@ -72,6 +72,6 @@ void Oscillator::evolve() {
 
 double Oscillator::Lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>1.5) { std::cout<< "The Lorentzian distribution is very wide with gamma>1, there is a large frequency dispersion"<<'\n'; }
+  if(gamma>1.5) { std::cout<< "The Lorentzian distribution is very wide if gamma>1, there is a large frequency dispersion"<<'\n'; }
   return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
