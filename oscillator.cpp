@@ -71,5 +71,6 @@ void Oscillator::evolve() {
 }
 
 double Oscillator::Lorentz_g(double freq, double gamma){
+  if(gamma<0) { gamma = -1*gamma; }
   return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }

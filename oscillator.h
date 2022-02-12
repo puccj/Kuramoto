@@ -12,7 +12,7 @@ class Oscillator{
  protected:
   //static double _K; //coupling strength 
   static double _dt;
-  double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 e Lmax = 650 nm -> omega tra 2pi*c/Lmin e 2pi*c/Lmax 
+  double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;  //phase phi/theta
 
   bool phaseNearZero(double limit = _dt*2) { return (_phase < limit || _phase > 2*M_PI - limit); }
@@ -35,8 +35,8 @@ class Oscillator{
   //evolve the oscillator's dinamic
   void evolve();
   //Lorentz Distribution (allows to solve explicitly for r(K))
-  double Lorentz_g(double freq, double gamma = 1){};
-
+  double Lorentz_g(double freq, double gamma = 0.5){};   //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
+                                                        //quando comincia a superare 1.5 la L. è quasi piatta; sotto 0.4 si picca velocissimamente
 };
 
 
