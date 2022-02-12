@@ -9,7 +9,7 @@ double Oscillator::_dt = -1;
 
 double Oscillator::Lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>1.5) { std::cout<< "The Lorentzian distribution is very wide if gamma>1, there is a large frequency dispersion"<<'\n'; }
+  if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
   return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 

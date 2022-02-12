@@ -35,9 +35,9 @@ class Oscillator{
   //evolve the oscillator's dinamic
   void evolve();
   //Lorentz Distribution (allows to solve explicitly for r(K))
-  double Lorentz_g(double freq, double gamma = 0.5){};   //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
-                                                        //quando comincia a superare 1.5 la L. è quasi piatta; sotto 0.4 si picca velocissimamente
+  double Lorentz_g(double freq, double gamma = 0.01){}; //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
+                                                        //quando comincia a superare 1.5 è quasi piatta; sotto 0.4 si picca velocemente.
+                                                        //per il nostro intervallo di valori (+/- 0.8e15 Hz dalla media) dovremmo avere un gamma di all'incirca 0.01 o inferiore.
 };
-
 
 #endif //OSCILLATOR_H
