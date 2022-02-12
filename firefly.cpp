@@ -46,12 +46,11 @@ void Firefly::print(std::vector<Firefly> system) {
       if (system[i].position() == n) {
         system.erase(system.begin()+i);
         present = true;
+        system[i].Oscillator::print();
         break;
       }
     }
-    if (present)
-      std::cout << "o ";
-    else
+    if (!present)
       std::cout << "  ";
   }
 
