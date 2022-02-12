@@ -68,9 +68,10 @@ void Oscillator::setPhase(double phase) {
 
 void Oscillator::print() {
   
+  //just for debug
   // system("cls");
-  std::cout << "dt: " << _dt << '\n';
-  std::cout << "phase: " << _phase << " - freq: " << _freq << '\n';
+  // std::cout << "dt: " << _dt << '\n';
+  // std::cout << "phase: " << _phase << " - freq: " << _freq << '\n';
   
   if (phaseNearZero())
     std::cout << "X ";

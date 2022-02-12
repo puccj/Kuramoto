@@ -10,16 +10,18 @@ int main(){
    * quello reale che passa tra un frame e l'altro
    */
   
-  Oscillator::setDt(1); //time (seconds) "di calcolo"
-  std::chrono::duration<int, std::micro> usToSleep (1000000);  //time (microseconds) between each frame
-   
+  Oscillator::setDt(0.050);   //time (seconds) "di calcolo"
+  int sleep = 50000;          //time (microseconds) between each frame
+  int simulationLength = 20;  //duration (seconds) of the simulation
+  std::chrono::duration<int, std::micro> usToSleep (sleep);
+
   //int N = 5;
   Firefly::setGridDim(5);
   /*std::vector<Firefly> sciame(N);  //create an array of N Firefly (no parameter set -> random)
   Firefly::print(sciame);
   */
 
-  Firefly prova = Firefly(2); //firefly with frequency of 2 and random phase and position
+  Firefly prova = Firefly(0.5); //firefly with frequency of 2 and random phase and position
 
   /*
   Oscillator prova(2,0);
@@ -27,9 +29,8 @@ int main(){
   std::cout << prova.phase() << '\n';
   prova.setPhase(2*M_PI);
   std::cout << prova.phase() << '\n';
-  */ 
-
-  for (int i = 0; i < 10; i++) {
+  */
+  for (int i = 0; i < simulationLength*1000000/sleep ; i++) {
     //start timer..
     auto startClock = std::chrono::high_resolution_clock::now();
     auto endClock = startClock + usToSleep;

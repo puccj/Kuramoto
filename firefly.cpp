@@ -11,7 +11,7 @@ Firefly::Firefly(double freq, double phase, int position): Oscillator(freq, phas
     setDefaultGridDim();
   }
   
-  if (position > _gridDim*_gridDim) {
+  if (position >= _gridDim*_gridDim) {
     std::cerr << "WARN (12): position value is too high for the set grid dimension: using a random position instead.\n";
     std::cerr << "Use Firefly::setGridDim static function if you want to change the grid dimension\n";
     position = -1;
