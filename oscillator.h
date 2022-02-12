@@ -9,6 +9,7 @@ using namespace std::complex_literals;
 
 
 class Oscillator{
+ protected:
   //static double _K; //coupling strength 
   static double _dt;
   double _freq;   //frequency omega

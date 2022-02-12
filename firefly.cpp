@@ -5,7 +5,7 @@
 
 int Firefly::_gridDim = -1;
 
-Firefly::Firefly(double freq, double phase, int position): _oscill{Oscillator(freq, phase)}, _position{position} {
+Firefly::Firefly(double freq, double phase, int position): Oscillator(freq, phase), _position{position} {
   if (_gridDim == -1) {
     std::cerr << "WARN (11): _gridDim value not set: using default value. Use Firefly::setGridDim static function if you want to set it manually\n";
     setDefaultGridDim();

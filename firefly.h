@@ -3,10 +3,12 @@
 
 #include "oscillator.h"
 
-class Firefly{
+class Firefly : public Oscillator{
   static int _gridDim;  //dimension (side) of the grid where fireflies will be placed
   int _position;        //position of firefly on the grid
-  Oscillator _oscill;   //brain of the firefly
+  
+  //non serve perché la classe Firefly è derivata da Oscillator, quindi ha tutte le cose dell'oscillator:
+  //Oscillator _oscill;   //brain of the firefly
 
   static void setDefaultGridDim() { _gridDim = 10; }
  public:
