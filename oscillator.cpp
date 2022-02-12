@@ -10,7 +10,7 @@ double Oscillator::_dt = -1;
 double Oscillator::Lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
   if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
-  return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
+  return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
