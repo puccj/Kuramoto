@@ -3,7 +3,7 @@
 
 #include "oscillator.h"
 
-class Firefly {
+class Firefly{
   static int _gridDim;  //dimension (side) of the grid where fireflies will be placed
   int _position;        //position of firefly on the grid
   Oscillator _oscill;   //brain of the firefly

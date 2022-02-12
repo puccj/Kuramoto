@@ -1,10 +1,11 @@
 #include "oscillator.h"
 #include <vector>
 #include <random>
+#include <iostream>
 using namespace std::complex_literals;
 
-//int Oscillator::_N;  //numero di oscillatori
 //double Oscillator::_K; //parametro di accoppiamento
+double Oscillator::_dt = -1;
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
   if (freq == -1) {    
@@ -24,16 +25,6 @@ Oscillator::Oscillator(double freq, double phase): _freq{freq} {
     setPhase(phase);
 }
 
-void Oscillator::setPhase(double phase) {
-  while (phase < 0) {
-    phase += 2 * M_PI;
-  }
-  while (phase >= 2*M_PI) {
-    phase -= 2 * M_PI;
-  }
-  _phase = phase;
-}
-
 //definire i parametri di campo medio
 std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system) {
   double cosAll;
@@ -48,4 +39,33 @@ std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system
   double r = std::sqrt(x*x + y*y);   
   double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
   return std::polar(r, psi);  //polar costruisce un exp complesso, MF sta per mean field non per Matteo Falcioni
+}
+
+void Oscillator::setPhase(double phase) {
+  while (phase < 0) {
+    phase += 2 * M_PI;
+  }
+  while (phase >= 2*M_PI) {
+    phase -= 2 * M_PI;
+  }
+  _phase = phase;
+}
+
+void Oscillator::print() {
+  system("cls");
+  std::cout << "dt: " << _dt << '\n';
+  std::cout << "phase: " << _phase << " - freq: " << _freq << '\n';
+  if (phaseNearZero())
+    std::cout << "X";
+  else
+    std::cout << "."; 
+}
+
+void Oscillator::evolve() {
+  if (_dt == -1) {
+    std::cerr << "WARN (21): _dt not set: using default value. Use Oscillator::setDt static function if you want to set it manually\n";
+    //Mentre scrivevo sta riga ridevo perché pensavo che tanto il codice lo usiamo noi e sticazzi. Poi ho fatto tutto il main e non ho settato dt, ahahah
+    setDefaultDt();
+  }
+  setPhase(_phase + _freq*_dt); //equals to _phase += _freq*dt  + normalize.
 }
