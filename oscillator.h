@@ -12,7 +12,7 @@ class Oscillator{
  protected:
   //static double _K; //coupling strength 
   static double _dt;
-  double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
+  double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;  //phase phi/theta
 
   bool phaseNearZero(double limit = _dt*2) { return (_phase < limit || _phase > 2*M_PI - limit); }
