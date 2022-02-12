@@ -7,13 +7,16 @@ using namespace std::complex_literals;
 //double Oscillator::_K; //parametro di accoppiamento
 double Oscillator::_dt = -1;
 
+double Oscillator::Lorentz_g(double freq, double gamma){
+  if(gamma<0) { gamma = -1*gamma; }
+  if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
+  return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
+}
+
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
-  if (freq == -1) {    
-    std::random_device seed;
-    double l1 = 1;
-    double l2 = 2;  //non ho idea di quali possano essere valori ragionevoli per i parametri della lorentziana (anche questi random?)
-    std::cauchy_distribution<double> lorentzDist(l1,l2); //l1,l2 parametri della lorentziana (forse non è esattamente questa quella da usare, in caso la definiamo noi)
-    _freq = lorentzDist(seed);
+  if (freq == -1) {  
+    double seed = rand();
+    _freq = Lorentz_g(seed);  //ho fatto così per far generare le frequenze secondo la lorentziana
   }
 
   if (phase == -1) {
@@ -26,7 +29,7 @@ Oscillator::Oscillator(double freq, double phase): _freq{freq} {
 }
 
 //definire i parametri di campo medio
-std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system) {
+std::complex<double> Oscillator::orderParameter(std::vector<Oscillator>& system) {
   double cosAll;
   double sinAll;
   int n = system.size();
@@ -38,7 +41,7 @@ std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system
   double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
   double r = std::sqrt(x*x + y*y);   
   double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
-  return std::polar(r, psi);  //polar costruisce un exp complesso, MF sta per mean field non per Matteo Falcioni
+  return std::polar(r, psi);  //polar costruisce un exp complesso
 }
 
 void Oscillator::setPhase(double phase) {
