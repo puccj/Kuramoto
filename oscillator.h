@@ -18,7 +18,7 @@ class Oscillator{
   bool phaseNearZero(double limit = _dt*2) { return (_phase < limit || _phase > 2*M_PI - limit); }
   static void setDefaultDt() { _dt = 0.1; }
   std::complex<double> phasor() { return std::exp(1i*_phase); }                 //returns directly the exponential form
-  static std::complex<double> orderParamether(std::vector<Oscillator>& system); //returns r: order parameter
+  static std::complex<double> orderParameter(std::vector<Oscillator>& system); //returns r: order parameter
 
  public:
   //if not indicated, frequencies and phases are set randomly

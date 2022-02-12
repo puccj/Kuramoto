@@ -26,7 +26,7 @@ Oscillator::Oscillator(double freq, double phase): _freq{freq} {
 }
 
 //definire i parametri di campo medio
-std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system) {
+std::complex<double> Oscillator::orderParameter(std::vector<Oscillator>& system) {
   double cosAll;
   double sinAll;
   int n = system.size();
