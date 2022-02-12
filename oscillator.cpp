@@ -7,13 +7,16 @@ using namespace std::complex_literals;
 //double Oscillator::_K; //parametro di accoppiamento
 double Oscillator::_dt = -1;
 
+double Oscillator::Lorentz_g(double freq, double gamma){
+  if(gamma<0) { gamma = -1*gamma; }
+  if(gamma>1.5) { std::cout<< "The Lorentzian distribution is very wide if gamma>1, there is a large frequency dispersion"<<'\n'; }
+  return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
+}
+
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
-  if (freq == -1) {    
-    std::random_device seed;
-    double l1 = 1;
-    double l2 = 2;  //non ho idea di quali possano essere valori ragionevoli per i parametri della lorentziana (anche questi random?)
-    std::cauchy_distribution<double> lorentzDist(l1,l2); //l1,l2 parametri della lorentziana (forse non è esattamente questa quella da usare, in caso la definiamo noi)
-    _freq = lorentzDist(seed);
+  if (freq == -1) {  
+    double seed = rand();
+    _freq = Lorentz_g(seed);  //ho fatto così per far generare le frequenze secondo la lorentziana
   }
 
   if (phase == -1) {
@@ -68,10 +71,4 @@ void Oscillator::evolve() {
     setDefaultDt();
   }
   setPhase(_phase + _freq*_dt); //equals to _phase += _freq*dt  + normalize.
-}
-
-double Oscillator::Lorentz_g(double freq, double gamma){
-  if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>1.5) { std::cout<< "The Lorentzian distribution is very wide if gamma>1, there is a large frequency dispersion"<<'\n'; }
-  return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
