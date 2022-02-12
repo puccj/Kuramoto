@@ -70,6 +70,6 @@ void Oscillator::evolve() {
   setPhase(_phase + _freq*_dt); //equals to _phase += _freq*dt  + normalize.
 }
 
-double Oscillator::Lorentz_g(double freq, double gamma = 1){
+double Oscillator::Lorentz_g(double freq, double gamma){
   return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
