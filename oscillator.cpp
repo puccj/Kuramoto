@@ -38,7 +38,7 @@ std::complex<double> Oscillator::orderParamether(std::vector<Oscillator>& system
   double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
   double r = std::sqrt(x*x + y*y);   
   double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
-  return std::polar(r, psi);  //polar costruisce un exp complesso, MF sta per mean field non per Matteo Falcioni
+  return std::polar(r, psi);  //polar costruisce un exp complesso
 }
 
 void Oscillator::setPhase(double phase) {
@@ -68,4 +68,8 @@ void Oscillator::evolve() {
     setDefaultDt();
   }
   setPhase(_phase + _freq*_dt); //equals to _phase += _freq*dt  + normalize.
+}
+
+double Oscillator::Lorentz_g(double freq, double gamma = 1){
+  return { 1/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }

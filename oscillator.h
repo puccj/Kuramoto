@@ -34,6 +34,9 @@ class Oscillator{
   void print();
   //evolve the oscillator's dinamic
   void evolve();
+  //Lorentz Distribution (allows to solve explicitly for r(K))
+  double Lorentz_g(double freq, double gamma = 1){};
+
 };
 
 
