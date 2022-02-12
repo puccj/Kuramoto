@@ -6,8 +6,6 @@
 #include <vector>
 using namespace std::complex_literals;
 
-
-
 class Oscillator{
  protected:
   //static double _K; //coupling strength 
