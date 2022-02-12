@@ -12,7 +12,7 @@ class Firefly : public Oscillator{
 
   static void setDefaultGridDim() { _gridDim = 10; }
  public:
- //if not indicated, frequencies, phases and position are set randomly
+  //if not indicated, frequencies, phases and position are set randomly
   Firefly(double freq = -1, double phase = -1, int position = -1);
   
   static void setGridDim(int gridDim) { _gridDim = gridDim; }

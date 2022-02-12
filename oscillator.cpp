@@ -4,19 +4,31 @@
 #include <iostream>
 using namespace std::complex_literals;
 
-//double Oscillator::_K; //parametro di accoppiamento
-double Oscillator::_dt = -1;
-
-double Oscillator::Lorentz_g(double freq, double gamma){
+double lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
   if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
+//double Oscillator::_K; //parametro di accoppiamento
+double Oscillator::_dt = -1;
+
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
-  if (freq == -1) {  
+  if (freq == -1) {
+    //generate random frequency according to lorentzian distribution  
     double seed = rand();
-    _freq = Lorentz_g(seed);  //ho fatto così per far generare le frequenze secondo la lorentziana
+    std::uniform_real_distribution<double> xDist(-4,4);       //max e min da sistemare
+    std::uniform_real_distribution<double> yDist(0, 30.61);  //il max è il max della lorentziana
+
+    double randomX;
+    double randomY;
+    do {
+      randomX = xDist(seed);
+      randomY = yDist(seed);
+    } while (randomY > lorentz_g(randomX));
+
+    _freq = randomX;
+    //_freq = Lorentz_g(seed);  //ho fatto così per far generare le frequenze secondo la lorentziana //NO. Questo restituisce la lorentziana con quel valore come freq
   }
 
   if (phase == -1) {
