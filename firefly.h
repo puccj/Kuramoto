@@ -20,7 +20,9 @@ class Firefly : public Oscillator{
 
   //print system in ascii
   static void print(std::vector<Firefly> system);
-  //void evolve() { this->Oscillator::evolve(); }
+
+  //move the firefly in the grid
+  void move();
 };
 
 bool operator<(Firefly& lhs, Firefly& rhs);

@@ -60,6 +60,40 @@ void Firefly::print(std::vector<Firefly> system) {
   }
 }
 
+void Firefly::move() {
+  std::random_device seed;
+  std::uniform_int_distribution<int> moveDist(0, 3); //4 possibility
+  int direction = moveDist(seed);
+
+  switch (direction)
+  {
+  case 0:     //left
+    if (_position % _gridDim != 0) {
+        _position--;
+    }
+    break;
+  case 1:     //right
+    if (_position % _gridDim != _gridDim-1) {
+        _position++;
+    }
+    break;
+  case 2:     //up
+    if (_position / _gridDim != 0) {
+      _position -= _gridDim;
+    }
+    break;
+  case 3:     //down
+    if (_position / _gridDim != _gridDim-1) {
+      _position += _gridDim;
+    }
+    break;
+  default:
+    std::cerr << "ERR (31): Error in function move().\n";
+  }
+
+  //_history.push_back(_money);
+}
+
 bool operator<(Firefly& lhs, Firefly& rhs) {
   return lhs.position() < rhs.position();
 }
