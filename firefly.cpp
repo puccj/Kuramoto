@@ -88,7 +88,7 @@ void Firefly::move() {
     }
     break;
   default:
-    std::cerr << "ERR (31): Error in function move().\n";
+    std::cerr << "ERR (31): Error in function Firefly::move().\n";
   }
 
   //_history.push_back(_money);
