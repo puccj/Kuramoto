@@ -71,8 +71,8 @@ int main(){
         window.close();
 
       if (event.type == sf::Event::Resized) {
-        window.clear();
-        window.setSize(sf::Vector2u(event.size.width, event.size.height));
+        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+        window.setView(sf::View(visibleArea));
         Firefly::setWindowDim(event.size.width, event.size.height);
         //for debug:
         std::cout << "New sizes: " << Firefly::windowDim() << '\n';
