@@ -4,7 +4,7 @@
 #include "oscillator.h"
 #include <SFML/Graphics.hpp>
 
-class Firefly : public Oscillator{
+class Firefly : public Oscillator {
   static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the grid where fireflies will be placed
   sf::Vector2f _position;       //position of firefly on the grid
   

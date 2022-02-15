@@ -71,9 +71,13 @@ int main(){
         window.close();
 
       if (event.type == sf::Event::Resized) {
+        //view changes with window. Doing so, instead of squeezing/stretchin things, more things will be shown when resizing.
         sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
         window.setView(sf::View(visibleArea));
+        
+        //Let the place where fireflies spawn be the same of the window
         Firefly::setWindowDim(event.size.width, event.size.height);
+
         //for debug:
         std::cout << "New sizes: " << Firefly::windowDim() << '\n';
         std::cout << "New sizes: " << window.getSize() << '\n';
@@ -90,6 +94,13 @@ int main(){
           int size = sciame.size();
           for (int i = 0; i < size; i++)
             std::cout << sciame[i].freq() << '\t' << sciame[i].position() << '\n';
+        }
+      }
+
+      if (event.type == sf::Event::MouseWheelScrolled) {
+        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+          if (drawSize + event.mouseWheelScroll.delta > 1)
+            drawSize += event.mouseWheelScroll.delta;
         }
       }
     }
