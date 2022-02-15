@@ -13,6 +13,16 @@ double lorentz_g(double freq, double gamma){
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
+double gauss_g(double freq){  //normal distribution with mean=0 and sigma=1
+  double c = 1/sqrt(2*M_PI);
+  return { c*std::exp(-(freq*freq)/2) };
+}
+
+double boltzmann_g(double freq, double T){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
+  return { std::exp(-freq/T) };
+}
+
+
 double Oscillator::_K; //parametro di accoppiamento
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
