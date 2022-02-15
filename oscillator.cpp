@@ -11,8 +11,6 @@ double lorentz_g(double freq, double gamma){
 }
 
 double Oscillator::_K; //parametro di accoppiamento
-int Oscillator::_N;  //numero di oscillatori
-double Oscillator::_dt;
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
   if (freq == -1) {
@@ -81,23 +79,12 @@ void Oscillator::print() {
 
 void Oscillator::evolve(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
-  std::vector<Oscillator> system(_N);  //ho creato il vettore system dentro evolve ma si potrebbe mettere nel main oppure passarglielo
-  for(int t=0;t<dt*1e5; t+=dt){
-    interaction(system);
-
-    for(int i=0; i<_N; ++i){
-      for(int j=1; j<=_N; ++j){
-        if(system[i]._phase == system[j]._phase){ break; }  //questo l'ho scritto nel senso "l'evoluzione continua finché tutte le fasi non sono sincronizzate" ma non so se è quelo che vogliamo fare, né se si fa così
-      }
-    }
-
-  }
 }
 
-void Oscillator::interaction(std::vector<Oscillator>& system){
-  double k = _K/_N;
+void Oscillator::interact(std::vector<Oscillator>& system, double dt) {
+  int size = system.size();
 
-  for(int i=0; i<=_N; ++i){  //ogni oscillatore deve interagire con tutti gli altri
+  /*for (int i = 0; i < size; ++i){  //ogni oscillatore deve interagire con tutti gli altri
     double theta_i = system[i]._phase;
     double Sin=0; 
     for(int j=0; j<=_N; ++j){
@@ -107,7 +94,19 @@ void Oscillator::interaction(std::vector<Oscillator>& system){
       }  
     }
 
-    _phase = ( _freq + k*Sin )* _dt;
+    _phase = ( _freq + k*Sin )* dt;
+  }
+  *
+  * Interact non è una funzione statica (si potrebbe fare, ma da come l'hai fatta non lo è) e verrà chiamata 
+  * (tu l'avevi chiamata in evolve, io preferisco nel main o in un'atra funzione) una volta per ogni oscillatore.
+  * Quindi il primo ciclo è di troppo. Come vettore si dovrà passare il sistema meno l'oscillatore in questione
+  * (si può fare facilmente con std::vector::erase())
+  */
+
+  double sinAll = 0;
+  for (int i = 0; i < size; i++) {
+    sinAll += std::sin(system[i].phase());
   }
 
+  _phase = (_freq + _K*sinAll/size) * dt;
 }

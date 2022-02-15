@@ -13,9 +13,7 @@ double lorentz_g(double freq, double gamma = 0.01); //gamma deve essere >= 0, e 
 
 class Oscillator{
  protected:
-  static double _K; //coupling strength 
-  static int _N;
-  static double _dt;
+  static double _K; //coupling strength
   double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;  //phase phi/theta
 
@@ -28,9 +26,7 @@ class Oscillator{
   //if not indicated, frequencies and phases are set randomly
   Oscillator(double freq = -1, double phase = -1);
   
-  static void setDt(double dt) { _dt = dt; }
   static void setK(double K) { _K = K; }
-  static void setN(double N) { _N = N; }
 
   double freq() { return _freq; }
   void setFreq(double freq) { _freq = freq; }
@@ -41,8 +37,8 @@ class Oscillator{
   void print();
   //evolve the oscillator's dinamic considering dt seconds have passed.
   void evolve(double dt);
-  //makes the oscillators interact with each other
-  void interaction(std::vector<Oscillator>& system);
+  //makes the oscillator interact with the others. System indicates all the oscillator apart from this
+  void interact(std::vector<Oscillator>& system, double dt);
 };
 
 //returns "[random]" if num == -1. Else returns std::to_string(num).
