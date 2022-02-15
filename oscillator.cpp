@@ -6,16 +6,17 @@ using namespace std::complex_literals;
 
 double lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
+  if(gamma>1) { std::cout<< "Setting gamma>1 will flatten the Loretzian density"<<'\n'; }
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
-//double Oscillator::_K; //parametro di accoppiamento
-//double Oscillator::_dt = -1;
+double Oscillator::_K; //parametro di accoppiamento
+int Oscillator::_N;  //numero di oscillatori
+double Oscillator::_dt;
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
   if (freq == -1) {
-    //generate random frequency according to lorentzian distribution  
+    //generate random frequency according to the lorentzian distribution  
     std::random_device seed;
     std::uniform_real_distribution<double> xDist(-4,4);       //max e min da sistemare
     std::uniform_real_distribution<double> yDist(0, 30.61);   //il max è il max della lorentziana
@@ -28,7 +29,6 @@ Oscillator::Oscillator(double freq, double phase): _freq{freq} {
     } while (randomY > lorentz_g(randomX));
 
     _freq = randomX;
-    //_freq = Lorentz_g(seed);  //ho fatto così per far generare le frequenze secondo la lorentziana //No. Questo restituisce la lorentziana con quel valore come freq
   }
 
   if (phase == -1) {
@@ -79,18 +79,35 @@ void Oscillator::print() {
     std::cout << ". "; 
 }
 
-void Oscillator::evolve(double dt) {
-  /*if (_dt == -1) {
-    std::cerr << "WARN (21): _dt not set: using default value. Use Oscillator::setDt static function if you want to set it manually\n";
-    //Mentre scrivevo sta riga ridevo perché pensavo che tanto il codice lo usiamo noi e sticazzi. Poi ho fatto tutto il main e non ho settato dt, ahahah
-    setDefaultDt();
-  }*/
-  
+void Oscillator::evolve(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
+  std::vector<Oscillator> system(_N);  //ho creato il vettore system dentro evolve ma si potrebbe mettere nel main oppure passarglielo
+  for(int t=0;t<dt*1e5; t+=dt){
+    interaction(system);
+
+    for(int i=0; i<_N; ++i){
+      for(int j=1; j<=_N; ++j){
+        if(system[i]._phase == system[j]._phase){ break; }  //questo l'ho scritto nel senso "l'evoluzione continua finché tutte le fasi non sono sincronizzate" ma non so se è quelo che vogliamo fare, né se si fa così
+      }
+    }
+
+  }
 }
 
-std::string toString(double num) {
-  if (num == -1)
-    return "[random]";
-  return std::to_string(num);
+void Oscillator::interaction(std::vector<Oscillator>& system){
+  double k = _K/_N;
+
+  for(int i=0; i<=_N; ++i){  //ogni oscillatore deve interagire con tutti gli altri
+    double theta_i = system[i]._phase;
+    double Sin=0; 
+    for(int j=0; j<=_N; ++j){
+      if(j != i) {               //un oscillatore non interagisce con sé stesso
+        double theta_j = system[j]._phase;
+        Sin += std::sin(theta_j - theta_i);
+      }  
+    }
+
+    _phase = ( _freq + k*Sin )* _dt;
+  }
+
 }
