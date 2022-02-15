@@ -115,7 +115,7 @@ void Oscillator::interact(std::vector<Oscillator>& system, double dt) {
 
   double sinAll = 0;
   for (int i = 0; i < size; i++) {
-    sinAll += std::sin(system[i].phase());
+    sinAll += std::sin(system[i].phase() - _phase);   //theta_i - theta
   }
 
   _phase = (_freq + _K*sinAll/size) * dt;
