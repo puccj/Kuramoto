@@ -10,6 +10,8 @@ using namespace std::complex_literals;
 double lorentz_g(double freq, double gamma = 0.01); //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
                                                       //quando comincia a superare 1.5 è quasi piatta; sotto 0.4 si picca velocemente.
                                                       //per il nostro intervallo di valori
+double gauss_g(double freq);
+double boltzmann_g(double freq, double T);
 
 class Oscillator{
  protected:
