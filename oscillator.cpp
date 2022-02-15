@@ -11,7 +11,7 @@ double lorentz_g(double freq, double gamma){
 }
 
 //double Oscillator::_K; //parametro di accoppiamento
-double Oscillator::_dt = -1;
+//double Oscillator::_dt = -1;
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
   if (freq == -1) {
@@ -73,18 +73,18 @@ void Oscillator::print() {
   // std::cout << "dt: " << _dt << '\n';
   // std::cout << "phase: " << _phase << " - freq: " << _freq << '\n';
   
-  if (phaseNearZero())
+  if (std::sin(_phase) > 0.9)
     std::cout << "X ";
   else
     std::cout << ". "; 
 }
 
-void Oscillator::evolve() {
-  if (_dt == -1) {
+void Oscillator::evolve(double dt) {
+  /*if (_dt == -1) {
     std::cerr << "WARN (21): _dt not set: using default value. Use Oscillator::setDt static function if you want to set it manually\n";
     //Mentre scrivevo sta riga ridevo perché pensavo che tanto il codice lo usiamo noi e sticazzi. Poi ho fatto tutto il main e non ho settato dt, ahahah
     setDefaultDt();
-  }
+  }*/
   
-  setPhase(_phase + _freq*2*M_PI*_dt); //equals to _phase += _freq*dt  + normalize.
+  setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
 }

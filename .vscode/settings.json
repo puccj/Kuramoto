@@ -51,6 +51,12 @@
     "optional": "cpp",
     "ratio": "cpp",
     "fstream": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "cstring": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "iomanip": "cpp",
+    "semaphore": "cpp",
+    "stop_token": "cpp"
   }
 }

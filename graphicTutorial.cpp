@@ -64,7 +64,7 @@ int main() {
         break;
 
       } //end switch (event.type)
-    }
+    } //end while (event managing)
 
     window.clear(); //clear with default color (black)
     
