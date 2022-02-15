@@ -6,11 +6,12 @@ using namespace std::complex_literals;
 
 double lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>0.01) { std::cout<< "Setting gamma>0.01 will generate frequencies outside of the Fireflies physical range"<<'\n'; }
+  if(gamma>0.5) { std::cout<< "Setting gamma>0.5 will flatte the Loretzian density"<<'\n'; }
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
-//double Oscillator::_K; //parametro di accoppiamento
+double Oscillator::_K; //parametro di accoppiamento
+int Oscillator::_N;
 //double Oscillator::_dt = -1;
 
 Oscillator::Oscillator(double freq, double phase): _freq{freq} {
@@ -87,4 +88,21 @@ void Oscillator::evolve(double dt) {
   }*/
   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
+}
+
+void Oscillator::interaction(std::vector<Oscillator>& system){
+  double k = _K/_N;
+
+  for(int i=0; i<=_N; ++i){  //ogni oscillatore deve interagire con tutti gli altri
+    double theta_i = system[i]._phase;
+    double Sin=0; 
+    for(int j=0; j<=_N; ++j){
+      while(j != i) {               //un oscillatore non interagisce con sé stesso
+        double theta_j = system[j]._phase;
+        Sin += std::sin(theta_j - theta_i);
+      }  
+    }
+
+    _phase = ( _freq + k*Sin )* _dt;
+  }
 }

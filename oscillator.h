@@ -9,12 +9,13 @@ using namespace std::complex_literals;
 //Lorentz Distribution (allows to solve explicitly for r(K))
 double lorentz_g(double freq, double gamma = 0.01); //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
                                                       //quando comincia a superare 1.5 è quasi piatta; sotto 0.4 si picca velocemente.
-                                                      //per il nostro intervallo di valori (+/- 0.8e15 Hz dalla media) dovremmo avere un gamma di all'incirca 0.01 o inferiore.
+                                                      //per il nostro intervallo di valori
 
 class Oscillator{
  protected:
-  //static double _K; //coupling strength 
-  //static double _dt;
+  static double _K; //coupling strength 
+  static int _N;
+  static double _dt;
   double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;  //phase phi/theta
 
@@ -27,7 +28,10 @@ class Oscillator{
   //if not indicated, frequencies and phases are set randomly
   Oscillator(double freq = -1, double phase = -1);
   
-  // static void setDt(double dt) { _dt = dt; }
+  static void setDt(double dt) { _dt = dt; }
+  static void setK(double K) { _K = K; }
+  static void setN(double N) { _N = N; }
+
   double freq() { return _freq; }
   void setFreq(double freq) { _freq = freq; }
   double phase() { return _phase; };
@@ -37,6 +41,8 @@ class Oscillator{
   void print();
   //evolve the oscillator's dinamic considering dt seconds have passed.
   void evolve(double dt);
+  //makes the oscillators interact with each other
+  void interaction(std::vector<Oscillator>& system);
 };
 
 #endif //OSCILLATOR_H
