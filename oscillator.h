@@ -39,4 +39,7 @@ class Oscillator{
   void evolve(double dt);
 };
 
+//returns "[random]" if num == -1. Else returns std::to_string(num).
+std::string toString(double num);
+
 #endif //OSCILLATOR_H

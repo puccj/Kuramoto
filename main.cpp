@@ -52,7 +52,18 @@ int main(){
    */
 
   sf::Clock clock;
-  sf::RenderWindow window(sf::VideoMode(Firefly::windowDim().x + drawSize, Firefly::windowDim().y + drawSize), "Fireflies");
+  sf::RenderWindow window(sf::VideoMode(Firefly::windowDim().x, Firefly::windowDim().y), "Fireflies");
+
+  //load font
+  sf::Font arial;
+  if (!arial.loadFromFile("arial.ttf"))
+    std::cerr << "ERR(21): Couldn't load font. Check font is present in working folder.\n";
+  
+  //create text
+  sf::String staticText = "Press 'R' to add a random firefly (random position, phase and frequency).\n";
+  staticText += "Press 'S' to show/hide not-flashing fireflies.\nScroll your mouse wheel to change dimension of fireflies.\n";
+  sf::Text text(staticText, arial, 12);
+  //text.setStyle(sf::Text::Bold | sf::Text::Underlined);
 
   //debug:
   std::cout << "Freq\tPosition\n";
@@ -60,6 +71,11 @@ int main(){
     std::cout << sciame[i].freq() << '\t' << sciame[i].position() << '\n';
   }
   
+  //variables for KeyPressed
+  bool showOff = false;                             //show/hide not-flashing (off) fireflies
+  //sf::Vector2f addPosition = sf::Vector2f(-1,-1);   //position where to add new firefly pressing 'A'
+  double addFrequency = 1;                         //frequency of the new added firefly
+
   //main loop (or game loop)
   while (window.isOpen())
   {
@@ -84,7 +100,9 @@ int main(){
       }
 
       if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::A)
+        
+        //add a random firefly
+        if (event.key.code == sf::Keyboard::R)  
         {
           Firefly temp;
           sciame.push_back(temp);
@@ -95,29 +113,110 @@ int main(){
           for (int i = 0; i < size; i++)
             std::cout << sciame[i].freq() << '\t' << sciame[i].position() << '\n';
         }
+
+        //show/hide not-flashing fireflies
+        if (event.key.code == sf::Keyboard::S)  
+        {
+          showOff = !showOff;
+          //debug:
+          std::cout << "Showing not-flashing fireflies: " << showOff << '\n';
+        }
+        
+        /*
+        //Arrows: change position where to add firefly
+        if (event.key.code == sf::Keyboard::Left)   //addPosition x--
+        {
+          if (addPosition.x > 0)
+            addPosition.x--;
+          if (addPosition == sf::Vector2f(0,0))
+            addPosition = sf::Vector2f(-1,-1);
+        }
+        if (event.key.code == sf::Keyboard::Right)  //addPosition x++
+        {
+          if (addPosition.x < window.getSize().x - drawSize)
+            addPosition.x++;
+        }
+        if (event.key.code == sf::Keyboard::Up)     //addPosition y--
+        {
+          if (addPosition.y > 0)
+            addPosition.y--;
+          if (addPosition == sf::Vector2f(0,0))
+            addPosition = sf::Vector2f(-1,-1);
+        }
+        if (event.key.code == sf::Keyboard::Down)   //addPosition y++
+        {
+          if (addPosition.y < window.getSize().y - drawSize)
+            addPosition.y--;
+        }
+
+        //P / M : change frequency of added firefly
+        if (event.key.code == sf::Keyboard::P)
+          addFrequency++;
+        if (event.key.code == sf::Keyboard::M) {
+          if (addFrequency > -1)
+            addFrequency--;
+        }
+
+        //A : add a specific firefly
+        if (event.key.code == sf::Keyboard::A)
+        {
+          Firefly temp(addFrequency, -1, addPosition);
+          sciame.push_back(temp);
+          
+          //debug:
+          std::cout << "\nFreq\tPosition\n";
+          int size = sciame.size();
+          for (int i = 0; i < size; i++)
+            std::cout << sciame[i].freq() << '\t' << sciame[i].position() << '\n';
+        }
+        */
       }
 
-      if (event.type == sf::Event::MouseWheelScrolled) {
+      if (event.type == sf::Event::MouseWheelScrolled) {  //change dimension of fireflies
         if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
           if (drawSize + event.mouseWheelScroll.delta > 1)
             drawSize += event.mouseWheelScroll.delta;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+          Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
+          sciame.push_back(temp);
+
+          //debug:
+          std::cout << "Mouse: " << sf::Vector2f(event.mouseButton.x, event.mouseButton.y) << '\n';
+          std::cout << "Window: " << window.getSize() << '\n';
+          std::cout << "Grid: " << Firefly::windowDim() << '\n';
         }
       }
     }
 
     window.clear(); //clear with default color (black)
 
+    //draw static text
+    window.draw(text);
+
+    //draw changing/dinamic text
+    sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
+    toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
+    
+    window.draw(addText);
+
+    //draw fireflies
     int N = sciame.size();
     for (int i = 0; i < N; i++) {
       sf::CircleShape circle(drawSize);
       circle.setPosition(sciame[i].position());
 
-      if (std::sin(sciame[i].phase()) > 0.9)
+      if (std::sin(sciame[i].phase()) > 0.9) {  //da fare meglio. Facendo così le più lente stanno anche accese per più tempo.
         circle.setFillColor(sf::Color::Yellow);
-      else
-        circle.setFillColor(sf::Color::White);
-      
-      window.draw(circle);
+        window.draw(circle);
+      }
+      else if (showOff) {
+        circle.setFillColor(sf::Color(120,120,120));  //gray
+        window.draw(circle);
+      }
     }
     window.display();
     sf::Time elapsed = clock.restart();

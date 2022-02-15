@@ -59,6 +59,13 @@ int main() {
         std::cout << "wheel movement: " << event.mouseWheelScroll.delta << std::endl;
         std::cout << "mouse x: " << event.mouseWheelScroll.x << std::endl;
         std::cout << "mouse y: " << event.mouseWheelScroll.y << std::endl;
+      case sf::Event::MouseButtonPressed:
+        if (event.mouseButton.button == sf::Mouse::Right)
+        {
+            std::cout << "the right button was pressed" << std::endl;
+            std::cout << "mouse x: " << event.mouseButton.x << std::endl;
+            std::cout << "mouse y: " << event.mouseButton.y << std::endl;
+        }
 
       default:
         break;

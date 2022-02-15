@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2u& vector) {
 }
 
 bool operator>=(sf::Vector2f& lhs, sf::Vector2f& rhs) {
-  return lhs.x >= rhs.y || lhs.y >= rhs.x;
+  return lhs.x >= rhs.x || lhs.y >= rhs.y;
 }
 
 bool operator<(Firefly& lhs, Firefly& rhs) {

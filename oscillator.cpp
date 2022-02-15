@@ -88,3 +88,9 @@ void Oscillator::evolve(double dt) {
   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
 }
+
+std::string toString(double num) {
+  if (num == -1)
+    return "[random]";
+  return std::to_string(num);
+}
