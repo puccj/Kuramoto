@@ -95,31 +95,15 @@ void Oscillator::evolve(double dt) {
 }
 
 void Oscillator::interact(std::vector<Oscillator>& system, double dt) {
+  // Deve essere chiamata una volta per ogni oscillatore. Come vettore si dovrà passare il sistema meno l'oscillatore in questione
+  // (si può fare facilmente con std::vector::erase())
+
   int size = system.size();
 
-  /*for (int i = 0; i < size; ++i){  //ogni oscillatore deve interagire con tutti gli altri
-    double theta_i = system[i]._phase;
-    double Sin=0; 
-    for(int j=0; j<=_N; ++j){
-      if(j != i) {               //un oscillatore non interagisce con sé stesso
-        double theta_j = system[j]._phase;
-        Sin += std::sin(theta_j - theta_i);
-      }  
-    }
-
-    _phase = ( _freq + k*Sin )* dt;
-  }
-  *
-  * Interact non è una funzione statica (si potrebbe fare, ma da come l'hai fatta non lo è) e verrà chiamata 
-  * (tu l'avevi chiamata in evolve, io preferisco nel main o in un'atra funzione) una volta per ogni oscillatore.
-  * Quindi il primo ciclo è di troppo. Come vettore si dovrà passare il sistema meno l'oscillatore in questione
-  * (si può fare facilmente con std::vector::erase())
-  */
-
-  double sinAll = 0;
+  double sumDiffSin = 0;
   for (int i = 0; i < size; i++) {
-    sinAll += std::sin(system[i].phase() - _phase);   //theta_i - theta
+    sumDiffSin += std::sin(system[i].phase() - _phase);   //theta_i - theta
   }
 
-  _phase = (_freq + _K*sinAll/size) * dt;
+  _freq = (_freq + _K*sumDiffSin/size) * dt;
 }
