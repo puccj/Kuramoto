@@ -5,8 +5,11 @@
 using namespace std::complex_literals;
 
 double lorentz_g(double freq, double gamma){
-  if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>1) { std::cout<< "Setting gamma>1 will flatten the Loretzian density"<<'\n'; }
+  if(gamma < 0) { gamma = -gamma; }
+  if(gamma > 1) { 
+    std::cout<< "Setting gamma > 1 will flatten the Loretzian density"<<'\n';
+    gamma = 0.01;
+  }
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
@@ -17,7 +20,7 @@ Oscillator::Oscillator(double freq, double phase): _freq{freq} {
     //generate random frequency according to the lorentzian distribution  
     std::random_device seed;
     std::uniform_real_distribution<double> xDist(-4,4);       //max e min da sistemare
-    std::uniform_real_distribution<double> yDist(0, 30.61);   //il max è il max della lorentziana
+    std::uniform_real_distribution<double> yDist(0, 30.61);   //il max è il max della lorentziana (non dipende da gamma? usare la derivata e ricavare il max)
 
     double randomX;
     double randomY;
