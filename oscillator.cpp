@@ -6,7 +6,7 @@ using namespace std::complex_literals;
 
 double lorentz_g(double freq, double gamma){
   if(gamma<0) { gamma = -1*gamma; }
-  if(gamma>0.5) { std::cout<< "Setting gamma>0.5 will flatte the Loretzian density"<<'\n'; }
+  if(gamma>0.5) { std::cout<< "Setting gamma>0.5 will flatten the Loretzian density"<<'\n'; }
   return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
 }
 
@@ -97,7 +97,7 @@ void Oscillator::interaction(std::vector<Oscillator>& system){
     double theta_i = system[i]._phase;
     double Sin=0; 
     for(int j=0; j<=_N; ++j){
-      while(j != i) {               //un oscillatore non interagisce con sé stesso
+      if(j != i) {               //un oscillatore non interagisce con sé stesso
         double theta_j = system[j]._phase;
         Sin += std::sin(theta_j - theta_i);
       }  
@@ -105,4 +105,5 @@ void Oscillator::interaction(std::vector<Oscillator>& system){
 
     _phase = ( _freq + k*Sin )* _dt;
   }
+
 }
