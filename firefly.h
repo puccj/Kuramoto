@@ -6,17 +6,20 @@
 
 class Firefly : public Oscillator {
   static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the grid where fireflies will be placed
-  sf::Vector2f _position;       //position of firefly on the grid
+  //static sf::Vector2f _velocity   //velocity of fireflies moving around (Da fare)
+  sf::Vector2f _position;         //position of firefly on the grid
   
   static void setDefaultWindowDim() { _windowDim = sf::Vector2f(200,200); }
  public:
   //if not indicated, frequencies, phases and position are set randomly
-  Firefly(double freq = -1, double phase = -1, sf::Vector2f position = sf::Vector2f(-1,-1));
+  Firefly(double freq, double phase = -1, sf::Vector2f position = sf::Vector2f(-1,-1));
+  Firefly(Distribution dist = Distribution::Lorentz, double mean = 1, double param = 998, sf::Vector2f position = sf::Vector2f(-1,-1));
+
   
   //get and set functions:
   static sf::Vector2f windowDim();
   static void setWindowDim(sf::Vector2f windowDim) { _windowDim = windowDim; }
-  static void setWindowDim(int x, int y) {setWindowDim(sf::Vector2f(x,y)); }
+  static void setWindowDim(double x, double y) { setWindowDim(sf::Vector2f(x,y)); }
   static void setWindowDim(int size) { setWindowDim(sf::Vector2f(size, size)); }
   sf::Vector2f position() { return _position; }
 

@@ -16,7 +16,21 @@ Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(f
     std::cerr << "Use Firefly::setWindowDim static function if you want to change the window dimensions\n";
     position = sf::Vector2f(-1,-1);
   }
+  if (position == sf::Vector2f(-1,-1)) {   //default value -> random setting
+    std::random_device seed;
+    std::uniform_int_distribution<int> distX(0, _windowDim.x);
+    std::uniform_int_distribution<int> distY(0, _windowDim.y);
+    _position.x = distX(seed);
+    _position.y = distY(seed);
+  }
+}
 
+Firefly::Firefly(Distribution dist, double mean, double param, sf::Vector2f position) : Oscillator(dist, mean, param), _position{position} {
+  if (position >= _windowDim) {
+    std::cerr << "WARN (13): position value is too high for the set window dimensions: using a random position instead.\n";
+    std::cerr << "Use Firefly::setWindowDim static function if you want to change the window dimensions\n";
+    position = sf::Vector2f(-1,-1);
+  }
   if (position == sf::Vector2f(-1,-1)) {   //default value -> random setting
     std::random_device seed;
     std::uniform_int_distribution<int> distX(0, _windowDim.x);

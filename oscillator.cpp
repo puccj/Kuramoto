@@ -4,51 +4,44 @@
 #include <iostream>
 using namespace std::complex_literals;
 
-double lorentz_g(double freq, double gamma){
+double lorentz_g(double freq, double mean, double gamma){
   if(gamma < 0) { gamma = -gamma; }
   if(gamma > 1) { 
-    std::cout<< "Setting gamma > 1 will flatten the Loretzian density"<<'\n';
+    if (gamma != 998)
+      std::cout<< "Setting gamma > 1 will flatten the Loretzian density"<<'\n';
     gamma = 0.01;
   }
-  return { gamma/ ( M_PI*(gamma*gamma + freq*freq) ) };
+  return gamma/ ( M_PI*(gamma*gamma + (freq-mean)*(freq-mean)) );
 }
 
-double gauss_g(double freq){  //normal distribution with mean=0 and sigma=1
-  double c = 1/sqrt(2*M_PI);
-  return { c*std::exp(-(freq*freq)/2) };
+double gauss_g(double freq, double mean, double sigma){
+  double c = 1/sqrt(2*M_PI*sigma);
+  return c*std::exp( (freq-mean)*(freq-mean) / (-2*sigma));
 }
 
+//Non ho capito bene che distribuzione sarebbe. Mi servirebbe poi un modo per calcolare la media, in analogia con le altre distribuzioni
 double boltzmann_g(double freq, double T){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
-  return { std::exp(-freq/T) };
+  if (T == 998)
+    T = 2;    //Qualcosa di accettabile
+  return std::exp(-freq/T);
+}
+
+double exp_g(double freq, double mean) {
+  return std::exp(-freq/mean) / mean;
 }
 
 
-double Oscillator::_K; //parametro di accoppiamento
+double Oscillator::_K = -1; //parametro di accoppiamento
 
-Oscillator::Oscillator(double freq, double phase): _freq{freq} {
-  if (freq == -1) {
-    //generate random frequency according to the lorentzian distribution  
-    std::random_device seed;
-    std::uniform_real_distribution<double> xDist(-4,4);       //max e min da sistemare
-    std::uniform_real_distribution<double> yDist(0, 30.61);   //il max è il max della lorentziana (non dipende da gamma? usare la derivata e ricavare il max)
-
-    double randomX;
-    double randomY;
-    do {
-      randomX = xDist(seed);
-      randomY = yDist(seed);
-    } while (randomY > lorentz_g(randomX));
-
-    _freq = randomX;
-  }
-
+Oscillator::Oscillator(double freq, double phase = -1) : _freq{freq} {
   if (phase == -1) {
+    //generate phase randomly
     std::random_device seed;   
     std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
     _phase = phaseDist(seed);
+    return;
   }
-  else 
-    setPhase(phase);
+  setPhase(phase);
 }
 
 //definire i parametri di campo medio
@@ -65,6 +58,55 @@ std::complex<double> Oscillator::orderParameter(std::vector<Oscillator>& system)
   double r = std::sqrt(x*x + y*y);   
   double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
   return std::polar(r, psi);  //polar costruisce un exp complesso
+}
+
+Oscillator::Oscillator(Distribution dist, double mean, double param) {
+  
+  //generate random frequency according to the selected distribution  
+  double randomX;
+  double randomY;
+  std::random_device seed;
+  
+  switch (dist) {
+   case Distribution::Lorentz:
+    std::uniform_real_distribution<double> xDist(-4,4);
+    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,param));   //max is for freq = 0.
+    do {
+      randomX = xDist(seed);
+      randomY = yDist(seed);
+    } while (randomY > lorentz_g(randomX, param));
+    break;
+   case Distribution::Gauss:
+    std::uniform_real_distribution<double> xDist(-4,4);
+    std::uniform_real_distribution<double> yDist(0, gauss_g(0, mean, param));
+    do {
+      randomX = xDist(seed);
+      randomY = yDist(seed);
+    } while (randomY > gauss_g(randomX, mean, param));
+    break;
+   case Distribution::Boltzmann:
+    std::uniform_real_distribution<double> xDist(-4,4);   //il min e max della x
+    std::uniform_real_distribution<double> yDist(0, 50);  //da calcolare il max (di boltzmann)
+    do {
+      randomX = xDist(seed);
+      randomY = yDist(seed);
+    } while (randomY > boltzmann_g(randomX, param));
+    break;
+   case Distribution::Expo:
+    std::uniform_real_distribution<double> xDist(0,4);  //da calcolare meglio il max
+    std::uniform_real_distribution<double> yDist(0, exp_g(0, mean));
+    do {
+      randomX = xDist(seed);
+      randomY = yDist(seed);
+    } while (randomY > exp_g(randomX, mean));
+    break;
+  }
+  _freq = randomX;
+
+  //generate phase randomly
+  std::random_device seed;   
+  std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
+  _phase = phaseDist(seed);
 }
 
 void Oscillator::setPhase(double phase) {
@@ -98,6 +140,10 @@ void Oscillator::interact(std::vector<Oscillator>& system, double dt) {
   // Deve essere chiamata una volta per ogni oscillatore. Come vettore si dovrà passare il sistema meno l'oscillatore in questione
   // (si può fare facilmente con std::vector::erase())
 
+  if (_K == -1) {
+    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
+    setDefaultK();
+  }
   int size = system.size();
 
   double sumDiffSin = 0;

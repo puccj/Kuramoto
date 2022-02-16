@@ -6,30 +6,31 @@
 #include <vector>
 using namespace std::complex_literals;
 
+enum class Distribution {Lorentz, Gauss, Boltzmann, Expo};
+
 //Lorentz Distribution (allows to solve explicitly for r(K))
-double lorentz_g(double freq, double gamma = 0.01); //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
+double lorentz_g(double freq, double mean = 1, double gamma = 0.01); //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
                                                       //quando comincia a superare 1.5 è quasi piatta; sotto 0.4 si picca velocemente.
                                                       //per il nostro intervallo di valori
-double gauss_g(double freq);
-double boltzmann_g(double freq, double T);
+double gauss_g(double freq, double mean = 1, double sigma = 1);
+double boltzmann_g(double freq, double T = 2);    //manca double mean
+double exp_g(double freq, double mean = 1);
 
 class Oscillator{
  protected:
   static double _K; //coupling strength
-  double _freq;   //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
-  double _phase;  //phase phi/theta
+  double _freq;     //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
+  double _phase;    //phase phi/theta
 
-  // bool phaseNearZero(double limit = _dt*2) { return (_phase < limit || _phase > 2*M_PI - limit); }
-  // static void setDefaultDt() { _dt = 0.1; }
+  static void setDefaultK() { _K = 0.1; }     //Quanto il valore?
   std::complex<double> phasor() { return std::exp(1i*_phase); }                 //returns directly the exponential form
   static std::complex<double> orderParameter(std::vector<Oscillator>& system); //returns r: order parameter
-
+  
  public:
-  //if not indicated, frequencies and phases are set randomly
-  Oscillator(double freq = -1, double phase = -1);
+  Oscillator(double freq, double phase = -1);
+  Oscillator(Distribution dist = Distribution::Lorentz, double mean = 1, double param = 998);  //Deve essere un valore improponibile, per capire che non l'ha messo l'utente
   
   static void setK(double K) { _K = K; }
-
   double freq() { return _freq; }
   void setFreq(double freq) { _freq = freq; }
   double phase() { return _phase; };
