@@ -129,6 +129,13 @@ int main() {
     }
     window.display();
     sf::Time elapsed = clock.restart();
+
+    for(std::vector<Firefly>::iterator it = sciame.begin(); it != sciame.end(); ++it){
+      std::vector<Firefly> newsciame = sciame;
+      newsciame.erase(it);
+      sciame[it]->interact(newsciame, elapsed.asSeconds());
+    }
+
     Firefly::evolve(sciame, elapsed.asSeconds());
   }
   
