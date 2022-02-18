@@ -37,9 +37,6 @@ double exp_g(double freq, double mean) {  //questa che sarebbe?
   return std::exp(-freq/mean) / mean;
 }
 
-
-double Oscillator::_K = -1; //parametro di accoppiamento
-
 Oscillator::Oscillator(double freq, double phase = -1) : _freq{freq} {
   if (phase == -1) {
     //generate phase randomly
@@ -141,22 +138,4 @@ void Oscillator::print() {
 
 void Oscillator::evolve(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
-}
-
-void Oscillator::interact(std::vector<Oscillator>& system, double dt) {
-  // Deve essere chiamata una volta per ogni oscillatore. Come vettore si dovrà passare il sistema meno l'oscillatore in questione
-  // (si può fare facilmente con std::vector::erase())
-
-  if (_K == -1) {
-    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
-    setDefaultK();
-  }
-  int size = system.size();
-
-  double sumDiffSin = 0;
-  for (int i = 0; i < size; i++) {
-    sumDiffSin += std::sin(system[i].phase() - _phase);   //theta_i - theta
-  }
-
-  _freq = (_freq + _K*sumDiffSin/size) * dt;
 }

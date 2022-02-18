@@ -130,10 +130,20 @@ int main() {
     window.display();
     sf::Time elapsed = clock.restart();
 
-    for(std::vector<Firefly>::iterator it = sciame.begin(); it != sciame.end(); ++it){
+    /*for(std::vector<Firefly>::iterator it = sciame.begin(); it != sciame.end(); ++it){
       std::vector<Firefly> newsciame = sciame;
       newsciame.erase(it);
       sciame[it]->interact(newsciame, elapsed.asSeconds());
+    }
+    * Ti dà errore perché it è un puntatore di un elemento di sciame. Quindi prima cosa sarebbe it->interract (non sciame[it]).
+    * Poi non puoi usare il puntatore di sciame per cancellare l'elemento di newsciame.
+    */
+
+    int size = sciame.size();
+    for (int i = 0; i < size; i++) {
+      std::vector<Firefly> newsciame = sciame;
+      newsciame.erase(newsciame.begin() +i);
+      sciame[i].interact(newsciame, elapsed.asSeconds());
     }
 
     Firefly::evolve(sciame, elapsed.asSeconds());

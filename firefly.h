@@ -5,10 +5,12 @@
 #include <SFML/Graphics.hpp>
 
 class Firefly : public Oscillator {
+  static double _K;               //coupling strength between firefly
   static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the grid where fireflies will be placed
-  //static sf::Vector2f _velocity   //velocity of fireflies moving around (Da fare)
+  //static sf::Vector2f _velocity //velocity of fireflies moving around (Da fare)
   sf::Vector2f _position;         //position of firefly on the grid
   
+  static void setDefaultK() { _K = 0.1; }     //Quanto il valore?
   static void setDefaultWindowDim() { _windowDim = sf::Vector2f(200,200); }
  public:
   //if not indicated, frequencies, phases and position are set randomly
@@ -17,6 +19,7 @@ class Firefly : public Oscillator {
 
   
   //get and set functions:
+  static void setK(double K) { _K = K; }
   static sf::Vector2f windowDim();
   static void setWindowDim(sf::Vector2f windowDim) { _windowDim = windowDim; }
   static void setWindowDim(double x, double y) { setWindowDim(sf::Vector2f(x,y)); }
@@ -33,6 +36,9 @@ class Firefly : public Oscillator {
 
   //calls evolve for each element of vector
   static void evolve (std::vector<Firefly>& syst, double dt);
+
+  //makes the firefly (its oscillator) interact with the others. System indicates all the firefly apart from this
+  void interact(std::vector<Firefly>& system, double dt);
 };
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector);

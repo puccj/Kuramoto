@@ -18,11 +18,9 @@ double exp_g(double freq, double mean = 1);
 
 class Oscillator{
  protected:
-  static double _K; //coupling strength
   double _freq;     //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;    //phase phi/theta
 
-  static void setDefaultK() { _K = 0.1; }     //Quanto il valore?
   std::complex<double> phasor() { return std::exp(1i*_phase); }                 //returns directly the exponential form
   static std::complex<double> orderParameter(std::vector<Oscillator>& system); //returns r: order parameter
   
@@ -30,7 +28,6 @@ class Oscillator{
   Oscillator(double freq, double phase = -1);
   Oscillator(Distribution dist = Distribution::Lorentz, double mean = 1, double param = 998);  //Deve essere un valore improponibile, per capire che non l'ha messo l'utente
   
-  static void setK(double K) { _K = K; }
   double freq() { return _freq; }
   void setFreq(double freq) { _freq = freq; }
   double phase() { return _phase; };
@@ -40,8 +37,6 @@ class Oscillator{
   void print();
   //evolve the oscillator's dinamic considering dt seconds have passed.
   void evolve(double dt);
-  //makes the oscillator interact with the others. System indicates all the oscillator apart from this
-  void interact(std::vector<Oscillator>& system, double dt);
 };
 
 //returns "[random]" if num == -1. Else returns std::to_string(num).

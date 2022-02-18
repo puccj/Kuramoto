@@ -4,6 +4,7 @@
 #include <algorithm>
 
 sf::Vector2f Firefly::_windowDim = sf::Vector2f(-1,-1);
+double Firefly::_K = -1;
 
 Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(freq, phase), _position{position} {
   if (_windowDim == sf::Vector2f(-1,-1)) {
@@ -148,6 +149,21 @@ void Firefly::evolve(std::vector<Firefly>& syst, double dt) {
   for (int i = 0; i < size; i++) {
     syst[i].Oscillator::evolve(dt);
   }
+}
+
+void Firefly::interact(std::vector<Firefly>& system, double dt) {
+  if (_K == -1) {
+    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
+    setDefaultK();
+  }
+  int size = system.size();
+
+  double sumDiffSin = 0;
+  for (int i = 0; i < size; i++) {
+    sumDiffSin += std::sin(system[i].phase() - _phase);   //theta_i - theta
+  }
+
+  _freq = (_freq + _K*sumDiffSin/size) * dt;
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
