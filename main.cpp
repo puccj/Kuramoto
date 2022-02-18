@@ -107,10 +107,10 @@ int main() {
     window.draw(text);
 
     //draw changing/dinamic text
-    sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
-    toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
+    //sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
+    //toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
     
-    window.draw(addText);
+    //window.draw(addText);
 
     //draw fireflies
     int N = sciame.size();
@@ -139,6 +139,10 @@ int main() {
     * Poi non puoi usare il puntatore di sciame per cancellare l'elemento di newsciame.
     */
 
+    //debug:
+    std::cout << "AAAAAAAAAAAAAA\n";
+
+    
     int size = sciame.size();
     for (int i = 0; i < size; i++) {
       std::vector<Firefly> newsciame = sciame;

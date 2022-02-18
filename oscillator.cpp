@@ -37,7 +37,7 @@ double exp_g(double freq, double mean) {  //questa che sarebbe?
   return std::exp(-freq/mean) / mean;
 }
 
-Oscillator::Oscillator(double freq, double phase = -1) : _freq{freq} {
+Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
   if (phase == -1) {
     //generate phase randomly
     std::random_device seed;   
@@ -71,46 +71,44 @@ Oscillator::Oscillator(Distribution dist, double mean, double param) {
   double randomY;
   std::random_device seed;
   
-  switch (dist) {
-   case Distribution::Lorentz:
+  if (dist == Distribution::Lorentz) {
     std::uniform_real_distribution<double> xDist(-4,4);
-    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,param));   //max is for freq = 0.
+    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,mean, param));   //max is for freq = 0.
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
     } while (randomY > lorentz_g(randomX, param));
-    break;
-   case Distribution::Gauss:
+  }
+  else if (dist == Distribution::Gauss) {
     std::uniform_real_distribution<double> xDist(-4,4);
     std::uniform_real_distribution<double> yDist(0, gauss_g(0, mean, param));
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
     } while (randomY > gauss_g(randomX, mean, param));
-    break;
-   case Distribution::Boltzmann:
+  }
+  else if (dist == Distribution::Boltzmann) {
     std::uniform_real_distribution<double> xDist(-4,4);   //il min e max della x
     std::uniform_real_distribution<double> yDist(0, 50);  //da calcolare il max (di boltzmann)
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
     } while (randomY > boltzmann_g(randomX, param));
-    break;
-   case Distribution::Expo:
+  }
+  else if (dist == Distribution::Expo) {
     std::uniform_real_distribution<double> xDist(0,4);  //da calcolare meglio il max
     std::uniform_real_distribution<double> yDist(0, exp_g(0, mean));
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
     } while (randomY > exp_g(randomX, mean));
-    break;
   }
   _freq = randomX;
 
   //generate phase randomly
-  std::random_device seed;   
+  std::random_device seedPhase;   
   std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
-  _phase = phaseDist(seed);
+  _phase = phaseDist(seedPhase);
 }
 
 void Oscillator::setPhase(double phase) {
@@ -138,4 +136,10 @@ void Oscillator::print() {
 
 void Oscillator::evolve(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
+}
+
+std::string toString(double num) {
+  if (num == -1)
+    return "[random]";
+  return std::to_string(num);
 }
