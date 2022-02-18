@@ -24,7 +24,8 @@ double gauss_g(double freq, double mean, double sigma){
 /*
 *è la distribuzione di maxwell boltzmann, quella del microcanonico in fisica della materia: ti dice che le frequenze 
 *sono maggiormente distribuite vicino a Omega (che sarebbe la frequenza media caratteristica del sistema) e la 
-*probabilità di avere freq>Omega diminuisce esponenzialmente
+*probabilità di avere freq>Omega diminuisce esponenzialmente. La media è Omega^2. Problema che ho realizzato dopo avere scritto tutto: non è simmetrica 
+*rispetto all'origine, quindi succederà un macello? da vedere
 */
 double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
   if (Omega == 998)
