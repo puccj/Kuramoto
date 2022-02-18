@@ -9,9 +9,10 @@ double lorentz_g(double freq, double mean, double gamma){
   if(gamma > 1) { 
     if (gamma != 998)
       std::cout<< "Setting gamma > 1 will flatten the Loretzian density"<<'\n';
-    gamma = 0.01;
+    gamma = 0.5;  //ho visto che in varie simulazioni online usavano 0.5 per gamma
   }
   return gamma/ ( M_PI*(gamma*gamma + (freq-mean)*(freq-mean)) );
+
 }
 
 double gauss_g(double freq, double mean, double sigma){
@@ -20,13 +21,18 @@ double gauss_g(double freq, double mean, double sigma){
 }
 
 //Non ho capito bene che distribuzione sarebbe. Mi servirebbe poi un modo per calcolare la media, in analogia con le altre distribuzioni
-double boltzmann_g(double freq, double T){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
-  if (T == 998)
-    T = 2;    //Qualcosa di accettabile
-  return std::exp(-freq/T);
+/*
+*è la distribuzione di maxwell boltzmann, quella del microcanonico in fisica della materia: ti dice che le frequenze 
+*sono maggiormente distribuite vicino a Omega (che sarebbe la frequenza media caratteristica del sistema) e la 
+*probabilità di avere freq>Omega diminuisce esponenzialmente
+*/
+double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
+  if (Omega == 998)
+    Omega = 2;    //Qualcosa di accettabile
+  return std::exp(-freq/Omega);
 }
 
-double exp_g(double freq, double mean) {
+double exp_g(double freq, double mean) {  //questa che sarebbe?
   return std::exp(-freq/mean) / mean;
 }
 
