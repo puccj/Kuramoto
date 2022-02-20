@@ -9,11 +9,9 @@ using namespace std::complex_literals;
 enum class Distribution {Lorentz, Gauss, Boltzmann, Expo};
 
 //Lorentz Distribution (allows to solve explicitly for r(K))
-double lorentz_g(double freq, double mean = 1, double gamma = 0.01); //gamma deve essere >= 0, e più aumenta meno la lorentziana è piccata
-                                                      //quando comincia a superare 1.5 è quasi piatta; sotto 0.4 si picca velocemente.
-                                                      //per il nostro intervallo di valori
+double lorentz_g(double freq, double mean = 1, double gamma = 0.5);
 double gauss_g(double freq, double mean = 1, double sigma = 1);
-double boltzmann_g(double freq, double T = 2);    //manca double mean
+double boltzmann_g(double freq, double T = 2);    //manca double mean e non so come metterlo
 double exp_g(double freq, double mean = 1);
 
 class Oscillator{

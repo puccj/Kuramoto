@@ -7,7 +7,7 @@
 int main() {
   Firefly::setWindowDim(1000,700);
   double drawSize = 10;
-  
+
   std::vector<Firefly> sciame(5);  //create an array of N Firefly (no parameter -> dist Lorentz)
   for (int i = 0; i < 5; i++)
     sciame[i].setFreq(i+0.5);
@@ -138,10 +138,6 @@ int main() {
     * Ti dà errore perché it è un puntatore di un elemento di sciame. Quindi prima cosa sarebbe it->interract (non sciame[it]).
     * Poi non puoi usare il puntatore di sciame per cancellare l'elemento di newsciame.
     */
-
-    //debug:
-    std::cout << "AAAAAAAAAAAAAA\n";
-
     
     int size = sciame.size();
     for (int i = 0; i < size; i++) {

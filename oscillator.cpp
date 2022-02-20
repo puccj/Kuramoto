@@ -12,7 +12,6 @@ double lorentz_g(double freq, double mean, double gamma){
     gamma = 0.5;  //ho visto che in varie simulazioni online usavano 0.5 per gamma
   }
   return gamma/ ( M_PI*(gamma*gamma + (freq-mean)*(freq-mean)) );
-
 }
 
 double gauss_g(double freq, double mean, double sigma){
@@ -33,7 +32,7 @@ double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution,
   return std::exp(-freq/Omega);
 }
 
-double exp_g(double freq, double mean) {  //questa che sarebbe?
+double exp_g(double freq, double mean) {  //questa che sarebbe? //Sarebbe un'esponenziale decrescente. L'ho messa così a caso
   return std::exp(-freq/mean) / mean;
 }
 
@@ -65,7 +64,6 @@ std::complex<double> Oscillator::orderParameter(std::vector<Oscillator>& system)
 }
 
 Oscillator::Oscillator(Distribution dist, double mean, double param) {
-  
   //generate random frequency according to the selected distribution  
   double randomX;
   double randomY;
@@ -73,15 +71,15 @@ Oscillator::Oscillator(Distribution dist, double mean, double param) {
   
   if (dist == Distribution::Lorentz) {
     std::uniform_real_distribution<double> xDist(-4,4);
-    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,mean, param));   //max is for freq = 0.
+    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,0, param));   //max is for freq = 0 when mean = 0
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
-    } while (randomY > lorentz_g(randomX, param));
+    } while (randomY > lorentz_g(randomX, mean, param));
   }
   else if (dist == Distribution::Gauss) {
     std::uniform_real_distribution<double> xDist(-4,4);
-    std::uniform_real_distribution<double> yDist(0, gauss_g(0, mean, param));
+    std::uniform_real_distribution<double> yDist(0, gauss_g(0, 0, param));
     do {
       randomX = xDist(seed);
       randomY = yDist(seed);
@@ -121,13 +119,7 @@ void Oscillator::setPhase(double phase) {
   _phase = phase;
 }
 
-void Oscillator::print() {
-  
-  //just for debug
-  // system("cls");
-  // std::cout << "dt: " << _dt << '\n';
-  // std::cout << "phase: " << _phase << " - freq: " << _freq << '\n';
-  
+void Oscillator::print() { 
   if (std::sin(_phase) > 0.9)
     std::cout << "X ";
   else
