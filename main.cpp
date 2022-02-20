@@ -8,9 +8,10 @@ int main() {
   Firefly::setWindowDim(1000,700);
   double drawSize = 10;
 
-  std::vector<Firefly> sciame(5);  //create an array of N Firefly (no parameter -> dist Lorentz)
+  Firefly::setK(5);
+  std::vector<Firefly> sciame(100);  //create an array of N Firefly (no parameter -> dist Lorentz)
   for (int i = 0; i < 5; i++)
-    sciame[i].setFreq(i+0.5);
+    sciame[i].setFreq(1);
 
   //load font
   sf::Font arial;
@@ -19,7 +20,7 @@ int main() {
   
   //create static text
   sf::String staticText = "Press 'R' to add a random firefly (random position, phase and frequency).\n"; //Da fare: "according to ... distribution"
-  staticText += "Press 'S' to show/hide not-flashing fireflies.\nScroll your mouse wheel to change dimension of fireflies.\n";
+  staticText += "Press 'S' to show/hide not-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n";
   sf::Text text(staticText, arial, 12);
   
   //variables for events managing
@@ -103,9 +104,6 @@ int main() {
 
     window.clear(); //clear with default color (black)
 
-    //draw static text
-    window.draw(text);
-
     //draw changing/dinamic text
     //sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
     //toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
@@ -127,18 +125,15 @@ int main() {
         window.draw(circle);
       }
     }
+
+    //draw static text
+    window.draw(text);
+
+    //refresh display
     window.display();
     sf::Time elapsed = clock.restart();
 
-    /*for(std::vector<Firefly>::iterator it = sciame.begin(); it != sciame.end(); ++it){
-      std::vector<Firefly> newsciame = sciame;
-      newsciame.erase(it);
-      sciame[it]->interact(newsciame, elapsed.asSeconds());
-    }
-    * Ti dà errore perché it è un puntatore di un elemento di sciame. Quindi prima cosa sarebbe it->interract (non sciame[it]).
-    * Poi non puoi usare il puntatore di sciame per cancellare l'elemento di newsciame.
-    */
-    
+    //interact
     int size = sciame.size();
     for (int i = 0; i < size; i++) {
       std::vector<Firefly> newsciame = sciame;
@@ -146,7 +141,9 @@ int main() {
       sciame[i].interact(newsciame, elapsed.asSeconds());
     }
 
+    //evolve
     Firefly::evolve(sciame, elapsed.asSeconds());
-  }
+  
+  } //end game loop
   
 }

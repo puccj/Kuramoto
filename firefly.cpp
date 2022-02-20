@@ -156,14 +156,15 @@ void Firefly::interact(std::vector<Firefly>& system, double dt) {
     std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
     setDefaultK();
   }
+
   int size = system.size();
 
-  double sumDiffSin = 0;
-  for (int i = 0; i < size; i++) {
-    sumDiffSin += std::sin(system[i].phase() - _phase);   //theta_i - theta
+  double sumSinDiff = 0;
+  for (int i = 0; i < size; i++) {\
+    sumSinDiff += std::sin(system[i].phase() - _phase);   //theta_i - theta
   }
 
-  _freq = (_freq + _K*sumDiffSin/size) * dt;
+  _freq += _K*sumSinDiff/size;
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
