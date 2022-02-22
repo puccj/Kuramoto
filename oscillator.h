@@ -19,7 +19,7 @@ class Oscillator{
   double _freq;     //frequency omega   //nota: lunghezze d'onda comprese tra Lmin = 500 nm e Lmax = 650 nm -> omega tra 2pi*c/Lmax=3.77e15 e 2pi*c/Lmin=2.9e15 Hz 
   double _phase;    //phase phi/theta
 
-  std::complex<double> phasor() { return std::exp(1i*_phase); }                 //returns directly the exponential form
+  std::complex<double> phasor() { return std::__complex_exp(1i*_phase); }                 //returns directly the exponential form
   static std::complex<double> orderParameter(std::vector<Oscillator>& system); //returns r: order parameter
   
  public:

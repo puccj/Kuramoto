@@ -8,8 +8,8 @@ int main() {
   Firefly::setWindowDim(1000,700);
   double drawSize = 10;
 
-  Firefly::setK(5);
-  std::vector<Firefly> sciame(100);  //create an array of N Firefly (no parameter -> dist Lorentz)
+  Firefly::setK(0.8);
+  std::vector<Firefly> sciame(500);  //create an array of N Firefly (no parameter -> dist Lorentz)
   for (int i = 0; i < sciame.size(); i++)  { //provando a mettere tutte con stessa freq
     sciame[i].setFreq(1);
   }
@@ -135,15 +135,15 @@ int main() {
 
     //interact
     int size = sciame.size();
+
     for (int i = 0; i < size; i++) {
       std::vector<Firefly> newsciame = sciame;
       newsciame.erase(newsciame.begin() +i);
       sciame[i].interact(newsciame, elapsed.asSeconds());
     }
-
     //evolve
     Firefly::evolve(sciame, elapsed.asSeconds());
-  
+
   } //end game loop
   
 }
