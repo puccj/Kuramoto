@@ -10,9 +10,9 @@ int main() {
 
   Firefly::setK(5);
   std::vector<Firefly> sciame(100);  //create an array of N Firefly (no parameter -> dist Lorentz)
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < sciame.size(); i++)  { //provando a mettere tutte con stessa freq
     sciame[i].setFreq(1);
-
+  }
   //load font
   sf::Font arial;
   if (!arial.loadFromFile("arial.ttf"))

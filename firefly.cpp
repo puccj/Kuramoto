@@ -160,11 +160,11 @@ void Firefly::interact(std::vector<Firefly>& system, double dt) {
   int size = system.size();
 
   double sumSinDiff = 0;
-  for (int i = 0; i < size; i++) {\
+  for (int i = 0; i < size; i++) {
     sumSinDiff += std::sin(system[i].phase() - _phase);   //theta_i - theta
   }
 
-  _freq += _K*sumSinDiff/size;
+  _phase += ( _K*sumSinDiff/size ) * dt;
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
