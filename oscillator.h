@@ -20,7 +20,6 @@ class Oscillator{
   double _phase;    //phase phi/theta
 
   std::complex<double> phasor() { return std::__complex_exp(1i*_phase); }                 //returns directly the exponential form
-  static std::complex<double> orderParameter(std::vector<Oscillator>& system); //returns r: order parameter
   
  public:
   Oscillator(double freq, double phase = -1);

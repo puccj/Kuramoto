@@ -143,6 +143,36 @@ void Firefly::move() {
 }
 */
 
+std::complex<double> Firefly::orderParameter(std::vector<Firefly>& system) {
+  double cosAll = 0;
+  double sinAll = 0;
+  int n = system.size();
+  for(int i = 0; i < n; ++i){
+    cosAll += std::cos(system[i].phase());  //cosAll è la somma di tutti i coseni di theta_i
+    sinAll += std::sin(system[i].phase());  //stesso per sinAll
+  }
+  double x = cosAll/n;
+  double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
+  double r = std::sqrt(x*x + y*y);   
+  double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
+  return std::polar(r, psi);  //polar costruisce un exp complesso
+}
+
+double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
+  double cosAll = 0;
+  double sinAll = 0;
+  int n = system.size();
+  for(int i = 0; i < n; ++i){
+    cosAll += std::cos(system[i].phase());  //cosAll è la somma di tutti i coseni di theta_i
+    sinAll += std::sin(system[i].phase());  //stesso per sinAll
+  }
+  double x = cosAll/n;
+  double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
+  return std::sqrt(x*x + y*y);
+
+  //return sqrt(Firefly::orderParameter(system).real()*Firefly::orderParameter(system).real() + 
+  //Firefly::orderParameter(system).imag()*Firefly::orderParameter(system).imag()) ;
+}
 
 void Firefly::evolve(std::vector<Firefly>& syst, double dt) {
   int size = syst.size();
@@ -164,7 +194,7 @@ void Firefly::interact(std::vector<Firefly>& system, double dt) {
     sumSinDiff += std::sin(system[i].phase() - _phase);   //theta_i - theta
   }
 
-  _phase += ( _K*sumSinDiff/size ) * dt;
+  setPhase(_phase + (_freq + _K*sumSinDiff/size ) * dt);  //sarebbe  phase += ()*dt + normalize
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {

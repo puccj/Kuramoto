@@ -15,6 +15,8 @@ double lorentz_g(double freq, double mean, double gamma){
 }
 
 double gauss_g(double freq, double mean, double sigma){
+  if (sigma == 998)
+    sigma = 1;
   double c = 1/sqrt(2*M_PI*sigma);
   return c*std::exp( (freq-mean)*(freq-mean) / (-2*sigma));
 }
@@ -45,22 +47,6 @@ Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
     return;
   }
   setPhase(phase);
-}
-
-//definire i parametri di campo medio
-std::complex<double> Oscillator::orderParameter(std::vector<Oscillator>& system) {
-  double cosAll;
-  double sinAll;
-  int n = system.size();
-  for(int i = 0; i < n; ++i){
-    cosAll += std::cos(system[i].phase());  //cosAll è la somma di tutti i coseni di theta_i
-    sinAll += std::cos(system[i].phase());  //stesso per sinAll
-  }
-  double x = cosAll/n;
-  double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
-  double r = std::sqrt(x*x + y*y);   
-  double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
-  return std::polar(r, psi);  //polar costruisce un exp complesso
 }
 
 Oscillator::Oscillator(Distribution dist, double mean, double param) {

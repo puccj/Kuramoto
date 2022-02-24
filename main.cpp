@@ -3,16 +3,27 @@
 #include <thread>
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <fstream>
 
 int main() {
   Firefly::setWindowDim(1000,700);
-  double drawSize = 10;
-
-  Firefly::setK(0.8);
-  std::vector<Firefly> sciame(500);  //create an array of N Firefly (no parameter -> dist Lorentz)
-  for (int i = 0; i < sciame.size(); i++)  { //provando a mettere tutte con stessa freq
-    sciame[i].setFreq(1);
+  double drawSize = 5;
+  
+  //Firefly* sciame[500] = new Firefly(Distribution::Gauss);
+  std::vector<Firefly> sciame;
+  std::fstream fout("output.txt",std::ios::out);
+  for (int i = 0; i < 1000; i++) {
+    sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
+    fout << sciame[i].freq() << '\n';
   }
+  fout.close();
+
+  std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
+  Firefly::setK(10);
+  
+
+  // End of settings --------------------------------
+  
   //load font
   sf::Font arial;
   if (!arial.loadFromFile("arial.ttf"))
@@ -107,8 +118,9 @@ int main() {
     //draw changing/dinamic text
     //sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
     //toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
-    
-    //window.draw(addText);
+    double module = sqrt(Firefly::orderParameter(sciame).real()*Firefly::orderParameter(sciame).real() + Firefly::orderParameter(sciame).imag()*Firefly::orderParameter(sciame).imag());
+    sf::Text rText("\n\n\n\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(sciame)), arial,12);
+    window.draw(rText);
 
     //draw fireflies
     int N = sciame.size();

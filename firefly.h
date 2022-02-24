@@ -34,6 +34,10 @@ class Firefly : public Oscillator {
   // ma il tempo dipende da quanto tempo impiega il computer per calcolare tutto il frame. (Nota infatti che Oscillator::evolve ha un parametro)
   // void move();
 
+  //returns r: order parameter
+  static std::complex<double> orderParameter(std::vector<Firefly>& system);
+  static double moduleOrderParameter(std::vector<Firefly>& system);
+
   //calls evolve for each element of vector
   static void evolve (std::vector<Firefly>& syst, double dt);
 
