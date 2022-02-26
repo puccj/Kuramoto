@@ -121,3 +121,9 @@ std::string toString(double num) {
     return "[random]";
   return std::to_string(num);
 }
+
+std::string literal(bool b) {
+  if (b) 
+    return "True";
+  return "False";
+}
