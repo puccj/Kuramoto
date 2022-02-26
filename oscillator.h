@@ -39,4 +39,7 @@ class Oscillator{
 //returns "[random]" if num == -1. Else returns std::to_string(num).
 std::string toString(double num);
 
+//returns "true" or "false"
+std::string literal(bool b);
+
 #endif //OSCILLATOR_H

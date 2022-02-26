@@ -12,6 +12,10 @@ class Firefly : public Oscillator {
   
   static void setDefaultK() { _K = 0.1; }     //Quanto il valore?
   static void setDefaultWindowDim() { _windowDim = sf::Vector2f(200,200); }
+
+  //makes the firefly (its oscillator) interact with the others. System indicates all the firefly minus this
+  void interact(std::vector<Firefly>& system, double dt);
+
  public:
   //if not indicated, frequencies, phases and position are set randomly
   Firefly(double freq, double phase = -1, sf::Vector2f position = sf::Vector2f(-1,-1));
@@ -38,11 +42,8 @@ class Firefly : public Oscillator {
   static std::complex<double> orderParameter(std::vector<Firefly>& system);
   static double moduleOrderParameter(std::vector<Firefly>& system);
 
-  //calls evolve for each element of vector
-  static void evolve (std::vector<Firefly>& syst, double dt);
-
-  //makes the firefly (its oscillator) interact with the others. System indicates all the firefly apart from this
-  void interact(std::vector<Firefly>& system, double dt);
+  //calls evolve and interact for each element of the vector
+  static void evolve (std::vector<Firefly>& syst, double dt, bool interaction = false);
 };
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector);

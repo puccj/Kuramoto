@@ -11,12 +11,12 @@ int main() {
   
   //Firefly* sciame[500] = new Firefly(Distribution::Gauss);
   std::vector<Firefly> sciame;
-  std::fstream fout("output.txt",std::ios::out);
+  //std::fstream fout("output.txt",std::ios::out);
   for (int i = 0; i < 1000; i++) {
     sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
-    fout << sciame[i].freq() << '\n';
+    //fout << sciame[i].freq() << '\n';
   }
-  fout.close();
+  //fout.close();
 
   std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
   Firefly::setK(10);
@@ -37,7 +37,7 @@ int main() {
   //variables for events managing
   bool showOff = false;     //show/hide not-flashing (off) fireflies
   double addFrequency = 1;  //frequency of the new added firefly
-  //double addDist = Distribution::Lorentz
+  double interact = false;  //toggle interaction
 
   sf::Clock clock;
   sf::RenderWindow window(sf::VideoMode(Firefly::windowDim().x, Firefly::windowDim().y), "Fireflies");
@@ -63,14 +63,14 @@ int main() {
 
       if (event.type == sf::Event::KeyPressed) {
         
-        //add a random firefly
+        //R : add a random firefly
         if (event.key.code == sf::Keyboard::R)    //Da fare: according to ... distribution
         {
           Firefly temp; //da fare: Firefly temp(dist)
           sciame.push_back(temp);
         }
 
-        //show/hide not-flashing fireflies
+        //S : show/hide not-flashing fireflies
         if (event.key.code == sf::Keyboard::S)  
           showOff = !showOff;
 
@@ -82,20 +82,11 @@ int main() {
             addFrequency--;
         }
 
-        /*
-        //A : add a specific firefly
-        if (event.key.code == sf::Keyboard::A)
+        //I : toggle interraction
+        if (event.key.code == sf::Keyboard::I)
         {
-          Firefly temp(addFrequency, -1, addPosition);
-          sciame.push_back(temp);
-          
-          //debug:
-          std::cout << "\nFreq\tPosition\n";
-          int size = sciame.size();
-          for (int i = 0; i < size; i++)
-            std::cout << sciame[i].freq() << '\t' << sciame[i].position() << '\n';
+          interact = !interact;
         }
-        */
       }
 
       if (event.type == sf::Event::MouseWheelScrolled) {  //change dimension of fireflies
@@ -114,13 +105,6 @@ int main() {
     }
 
     window.clear(); //clear with default color (black)
-
-    //draw changing/dinamic text
-    //sf::Text addText("\n\n\n\nClick everywhere to add a firefly with frequency of " + 
-    //toString(addFrequency) + " Hz.\n(Use arrow to change position and 'P' / 'M' key to change frequency)", arial, 12);
-    double module = sqrt(Firefly::orderParameter(sciame).real()*Firefly::orderParameter(sciame).real() + Firefly::orderParameter(sciame).imag()*Firefly::orderParameter(sciame).imag());
-    sf::Text rText("\n\n\n\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(sciame)), arial,12);
-    window.draw(rText);
 
     //draw fireflies
     int N = sciame.size();
@@ -141,20 +125,18 @@ int main() {
     //draw static text
     window.draw(text);
 
+    //draw dinamic (changing) text
+    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(interact) +
+    ")\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(sciame));
+    sf::Text dText(dString, arial,12);
+    window.draw(dText);
+
     //refresh display
     window.display();
     sf::Time elapsed = clock.restart();
 
-    //interact
-    int size = sciame.size();
-
-    for (int i = 0; i < size; i++) {
-      std::vector<Firefly> newsciame = sciame;
-      newsciame.erase(newsciame.begin() +i);
-      sciame[i].interact(newsciame, elapsed.asSeconds());
-    }
     //evolve
-    Firefly::evolve(sciame, elapsed.asSeconds());
+    Firefly::evolve(sciame, elapsed.asSeconds(), interact);
 
   } //end game loop
   

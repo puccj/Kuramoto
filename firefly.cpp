@@ -6,6 +6,22 @@
 sf::Vector2f Firefly::_windowDim = sf::Vector2f(-1,-1);
 double Firefly::_K = -1;
 
+void Firefly::interact(std::vector<Firefly>& system, double dt) {
+  if (_K == -1) {
+    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
+    setDefaultK();
+  }
+
+  int size = system.size();
+
+  double sumSinDiff = 0;
+  for (int i = 0; i < size; i++) {
+    sumSinDiff += std::sin(system[i].phase() - _phase);   //theta_i - theta
+  }
+
+  setPhase(_phase + (_freq + _K*sumSinDiff/size ) * dt);  //sarebbe  phase += ()*dt + normalize
+}
+
 Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(freq, phase), _position{position} {
   if (_windowDim == sf::Vector2f(-1,-1)) {
     std::cerr << "WARN (11): _windowDim value not set: using default value. Use Firefly::setWindowdDim static function if you want to set it manually\n";
@@ -174,27 +190,22 @@ double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
   //Firefly::orderParameter(system).imag()*Firefly::orderParameter(system).imag()) ;
 }
 
-void Firefly::evolve(std::vector<Firefly>& syst, double dt) {
+void Firefly::evolve(std::vector<Firefly>& syst, double dt, bool interaction) {
   int size = syst.size();
+
   for (int i = 0; i < size; i++) {
+    //evolve
     syst[i].Oscillator::evolve(dt);
   }
-}
 
-void Firefly::interact(std::vector<Firefly>& system, double dt) {
-  if (_K == -1) {
-    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
-    setDefaultK();
+  if (interaction) {
+    for (int i = 0; i < size; i++) {
+      //interact
+      std::vector<Firefly> newsciame = syst;  
+      newsciame.erase(newsciame.begin() +i);
+      syst[i].interact(newsciame, dt);
+    }
   }
-
-  int size = system.size();
-
-  double sumSinDiff = 0;
-  for (int i = 0; i < size; i++) {
-    sumSinDiff += std::sin(system[i].phase() - _phase);   //theta_i - theta
-  }
-
-  setPhase(_phase + (_freq + _K*sumSinDiff/size ) * dt);  //sarebbe  phase += ()*dt + normalize
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
