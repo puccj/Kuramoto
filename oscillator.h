@@ -28,8 +28,6 @@ class Oscillator {
   double phase() { return _phase; };
   void setPhase(double phase);
   
-  //print the oscillator in ascii
-  void print();
   //evolve the oscillator's dinamic considering dt seconds have passed.
   void evolve(double dt);
 };
