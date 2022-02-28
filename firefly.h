@@ -43,7 +43,7 @@ class Firefly : public Oscillator {
   static double moduleOrderParameter(std::vector<Firefly>& system);
 
   //calls evolve and interact for each element of the vector
-  static void evolve (std::vector<Firefly>& syst, double dt, bool interaction = false);
+  static void evolve(std::vector<Firefly>& syst, double dt, bool interaction = false);
 };
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector);

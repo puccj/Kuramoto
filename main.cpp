@@ -5,25 +5,9 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 
-int main() {
-  Firefly::setWindowDim(1000,700);
-  double drawSize = 5;
-  
-  //Firefly* sciame[500] = new Firefly(Distribution::Gauss);
-  std::vector<Firefly> sciame;
-  //std::fstream fout("output.txt",std::ios::out);
-  for (int i = 0; i < 1000; i++) {
-    sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
-    //fout << sciame[i].freq() << '\n';
-  }
-  //fout.close();
+void draw(std::vector<Firefly>& sciame) {
+  int drawSize = 5;
 
-  std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
-  Firefly::setK(10);
-  
-
-  // End of settings --------------------------------
-  
   //load font
   sf::Font arial;
   if (!arial.loadFromFile("arial.ttf"))
@@ -139,5 +123,29 @@ int main() {
     Firefly::evolve(sciame, elapsed.asSeconds(), interact);
 
   } //end game loop
+}
+
+int main() {
+  Firefly::setWindowDim(1000,700);
+  double drawSize = 5;
   
+  //Firefly* sciame[500] = new Firefly(Distribution::Gauss);
+  std::vector<Firefly> sciame;
+  //std::fstream fout("output.txt",std::ios::out);
+  for (int i = 0; i < 1000; i++) {
+    sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
+    //fout << sciame[i].freq() << '\n';
+  }
+  //fout.close();
+
+  std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
+  Firefly::setK(10);
+  
+  std::thread t(&draw, std::ref(sciame));
+  // End of settings --------------------------------
+  
+  
+  
+  t.join(); //wait for thread to terminate before proceding
+  return 0;
 }
