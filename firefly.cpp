@@ -5,6 +5,7 @@
 
 sf::Vector2f Firefly::_windowDim = sf::Vector2f(1000, 700);
 double Firefly::_K = 1;
+bool Firefly::_interaction = false;
 
 void Firefly::interact(std::vector<Firefly>& system, double dt) {
   int size = system.size();
@@ -73,20 +74,25 @@ double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
   return std::sqrt(x*x + y*y);
 }
 
-void Firefly::evolve(std::vector<Firefly>& syst, double dt, bool interaction) {
+void Firefly::evolve(std::vector<Firefly>& syst) {
   int size = syst.size();
+  sf::Clock clock;
 
-  for (int i = 0; i < size; i++) {
-    //evolve
-    syst[i].Oscillator::evolve(dt);
-  }
-
-  if (interaction) {
+  while(true) {
+    double dt = 0;
+    dt = clock.restart().asSeconds();
     for (int i = 0; i < size; i++) {
-      //interact
-      std::vector<Firefly> newsyst = syst;  
-      newsyst.erase(newsyst.begin() +i);
-      syst[i].interact(newsyst, dt);
+      //evolve
+      syst[i].Oscillator::evolve(dt);
+    }
+
+    if (_interaction) {
+      for (int i = 0; i < size; i++) {
+        //interact
+        //std::vector<Firefly> newsyst = syst;  
+        //newsyst.erase(newsyst.begin() +i);
+        syst[i].interact(syst, dt);
+      }
     }
   }
 }
@@ -107,10 +113,9 @@ void Firefly::draw(std::vector<Firefly>& syst) {
   //variables for events managing
   bool showOff = false;     //show/hide not-flashing (off) fireflies
   double addFrequency = 1;  //frequency of the new added firefly
-  double interact = false;  //toggle interaction
 
-  sf::Clock clock;
   sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies");
+  window.setFramerateLimit(30);
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -155,7 +160,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
         //I : toggle interraction
         if (event.key.code == sf::Keyboard::I)
         {
-          interact = !interact;
+          _interaction = !_interaction;
         }
       }
 
@@ -198,23 +203,23 @@ void Firefly::draw(std::vector<Firefly>& syst) {
     window.draw(text);
 
     //draw dinamic (changing) text
-    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(interact) +
+    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(_interaction) +
     ")\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(syst));
     sf::Text dText(dString, arial,12);
     window.draw(dText);
 
     //refresh display
     window.display();
-    sf::Time elapsed = clock.restart();
-
-    //evolve
-    Firefly::evolve(syst, elapsed.asSeconds(), interact);
   }
 }
 
-void Firefly::plot(std::vector<Firefly>& syst, int windowSize, int drawSize) {
-  sf::RenderWindow window(sf::VideoMode(windowSize+drawSize,windowSize+drawSize), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
+void Firefly::plot(std::vector<Firefly>& syst) {
+  int windowSize = 300;
+  int radius = 5;
+  int dim = windowSize + radius*2;
+  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
   window.setPosition(sf::Vector2i(_windowDim));
+  window.setFramerateLimit(30); //less lag
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -225,6 +230,12 @@ void Firefly::plot(std::vector<Firefly>& syst, int windowSize, int drawSize) {
     {
       if (event.type == sf::Event::Closed) 
         window.close();
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::I)
+        {
+          _interaction = !_interaction;
+        }
+      }
     }
 
     window.clear();
@@ -232,7 +243,7 @@ void Firefly::plot(std::vector<Firefly>& syst, int windowSize, int drawSize) {
     //draw oscillators
     int size = syst.size();
     for (int i = 0; i < size; i++) {
-      sf::CircleShape circle(drawSize);
+      sf::CircleShape circle(radius);
       double phase = syst[i].phase();
       circle.setPosition( (std::cos(phase)+1)*windowSize/2 , (std::sin(phase)+1)*windowSize/2 );
       window.draw(circle);
