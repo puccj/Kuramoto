@@ -3,6 +3,7 @@
 #include <random>
 #include <iostream>
 using namespace std::complex_literals;
+#include <SFML/Graphics.hpp>
 
 double lorentz_g(double freq, double mean, double gamma){
   if(gamma < 0) { gamma = -gamma; }

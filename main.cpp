@@ -9,7 +9,8 @@ int main() {
   std::vector<Firefly> sciame;
   //std::fstream fout("output.txt",std::ios::out);
   for (int i = 0; i < 1000; i++) {
-    sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
+    //sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
+    sciame.push_back(Firefly(0.1));
     //fout << sciame[i].freq() << '\n';
   }
 
@@ -18,6 +19,8 @@ int main() {
   
   //Drawing window in another thread, passing sciame as reference
   std::thread t(&Firefly::draw, std::ref(sciame));  
+
+  Firefly::plot(sciame);
   
 
   

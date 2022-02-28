@@ -101,7 +101,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
   
   //create static text
   sf::String staticText = "Press 'R' to add a random firefly (random position, phase and frequency).\n"; //Da fare: "according to ... distribution"
-  staticText += "Press 'S' to show/hide not-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n";
+  staticText += "Press 'S' to show/hide non-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n";
   sf::Text text(staticText, arial, 12);
   
   //variables for events managing
@@ -174,7 +174,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
           syst.push_back(temp);
         }
       }
-    }
+    } //end react to events
 
     window.clear(); //clear with default color (black)
 
@@ -184,7 +184,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
       sf::CircleShape circle(drawSize);
       circle.setPosition(syst[i].position());
 
-      if (std::sin(syst[i].phase()) > 0.9) {  //da fare meglio. Facendo così le più lente stanno anche accese per più tempo.
+      if (std::cos(syst[i].phase()) > 0.9) {  //da fare meglio. Facendo così le più lente stanno anche accese per più tempo.
         circle.setFillColor(sf::Color::Yellow);
         window.draw(circle);
       }
@@ -209,8 +209,39 @@ void Firefly::draw(std::vector<Firefly>& syst) {
 
     //evolve
     Firefly::evolve(syst, elapsed.asSeconds(), interact);
-
   }
+}
+
+void Firefly::plot(std::vector<Firefly>& syst, int windowSize, int drawSize) {
+  sf::RenderWindow window(sf::VideoMode(windowSize+drawSize,windowSize+drawSize), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
+  window.setPosition(sf::Vector2i(_windowDim));
+
+  //main loop (or game loop)
+  while (window.isOpen())
+  {
+    //reacts to Events
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+      if (event.type == sf::Event::Closed) 
+        window.close();
+    }
+
+    window.clear();
+
+    //draw oscillators
+    int size = syst.size();
+    for (int i = 0; i < size; i++) {
+      sf::CircleShape circle(drawSize);
+      double phase = syst[i].phase();
+      circle.setPosition( (std::cos(phase)+1)*windowSize/2 , (std::sin(phase)+1)*windowSize/2 );
+      window.draw(circle);
+    }
+
+    //refresh display
+    window.display();
+  }
+
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {

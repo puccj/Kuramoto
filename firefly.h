@@ -35,6 +35,9 @@ class Firefly : public Oscillator {
 
   //draw the system
   static void draw(std::vector<Firefly>& syst);
+
+  //plot the oscillators in a complex plane
+  static void plot(std::vector<Firefly>& syst, int windowSize = 300, int drawSize = 5);
 };
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector);
