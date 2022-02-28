@@ -3,15 +3,10 @@
 #include <random>
 #include <algorithm>
 
-sf::Vector2f Firefly::_windowDim = sf::Vector2f(-1,-1);
-double Firefly::_K = -1;
+sf::Vector2f Firefly::_windowDim = sf::Vector2f(1000, 700);
+double Firefly::_K = 1;
 
 void Firefly::interact(std::vector<Firefly>& system, double dt) {
-  if (_K == -1) {
-    std::cerr << "WARN (41): _K value not set: using default value. Use Oscillator::setK static function if you want to set it manually\n";
-    setDefaultK();
-  }
-
   int size = system.size();
 
   double sumSinDiff = 0;
@@ -22,12 +17,7 @@ void Firefly::interact(std::vector<Firefly>& system, double dt) {
   setPhase(_phase + (_freq + _K*sumSinDiff/size ) * dt);  //sarebbe  phase += ()*dt + normalize
 }
 
-Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(freq, phase), _position{position} {
-  if (_windowDim == sf::Vector2f(-1,-1)) {
-    std::cerr << "WARN (11): _windowDim value not set: using default value. Use Firefly::setWindowdDim static function if you want to set it manually\n";
-    setDefaultWindowDim();
-  }
-  
+Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(freq, phase), _position{position} { 
   if (position >= _windowDim) {
     std::cerr << "WARN (12): position value is too high for the set window dimensions: using a random position instead.\n";
     std::cerr << "Use Firefly::setWindowDim static function if you want to change the window dimensions\n";
@@ -57,108 +47,6 @@ Firefly::Firefly(Distribution dist, double mean, double param, sf::Vector2f posi
   }
 }
 
-sf::Vector2f Firefly::windowDim() { 
-  if (_windowDim == sf::Vector2f(-1,-1)) {
-    std::cerr << "WARN (31): _windowDim value not set: using default value. Use Firefly::setWindowDim static function if you want to set it manually\n";
-    setDefaultWindowDim();
-  }
-  return _windowDim;
-}
-
-/* 
-void Firefly::print(std::vector<Firefly> system) {
-  std::sort(system.begin(), system.end());
-
-  for (int y = 0; y < _gridDim.y; y++) {
-    if (y != 0)
-      std::cout << "|\n";
-    for (int x = 0; x < _gridDim.x; x++)
-      std::cout << "----";
-    std::cout << "\n| ";
-
-    bool present = false;
-    for (int x = 0; x < _gridDim.x; x++) {
-      for (int i = 0; i < system.size(); i++) {
-        if (system[i].position().y == y && system[i].position().x == x) {
-          system[i]
-        }
-      }
-    }
-  }
-
-  for (int n = 0; n < _gridDim.x*_gridDim.y; n++) {
-    if (n % (int) _gridDim.x == 0) {
-      if (n == 0)
-        std::cout << '\n';
-      else
-        std::cout << "|\n";
-      
-      for (int i = 0; i < _gridDim.x; i++)
-        std::cout << "----";
-      std::cout << '\n';
-    }
-
-    std::cout << "| ";
-    
-    bool present = false;
-    for(int i = 0; i < system.size(); i++) {
-      //converting 2D position in 1D
-      int position1D = system[i].position().x + system[i].position().y*_gridDim.x;
-
-      if (position1D == n) {
-        system.erase(system.begin()+i); //remove the element from the vector (no problem since the vector has been passed as a copy (not by &))
-        present = true;
-        system[i].Oscillator::print();
-        break;
-      }
-    }
-    if (!present)
-      std::cout << "  ";
-  }
-
-  std::cout << "|\n";
-  for (int i = 0; i < _gridDim.x; i++) {
-    std::cout << "----";
-  }
-}
- */
-
-/*
-void Firefly::move() {
-  std::random_device seed;
-  std::uniform_int_distribution<int> moveDist(0, 3); //4 possibility
-  int direction = moveDist(seed);
-
-  switch (direction)
-  {
-  case 0:     //left
-    if (_position % _gridDim != 0) {
-        _position--;
-    }
-    break;
-  case 1:     //right
-    if (_position % _gridDim != _gridDim-1) {
-        _position++;
-    }
-    break;
-  case 2:     //up
-    if (_position / _gridDim != 0) {
-      _position -= _gridDim;
-    }
-    break;
-  case 3:     //down
-    if (_position / _gridDim != _gridDim-1) {
-      _position += _gridDim;
-    }
-    break;
-  default:
-    std::cerr << "ERR (31): Error in function Firefly::move().\n";
-  }
-
-  //_history.push_back(_money);
-}
-*/
-
 std::complex<double> Firefly::orderParameter(std::vector<Firefly>& system) {
   double cosAll = 0;
   double sinAll = 0;
@@ -168,10 +56,8 @@ std::complex<double> Firefly::orderParameter(std::vector<Firefly>& system) {
     sinAll += std::sin(system[i].phase());  //stesso per sinAll
   }
   double x = cosAll/n;
-  double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
-  double r = std::sqrt(x*x + y*y);   
-  double psi = std::atan(y/x);        //non è così semplice calcolare la fase, non so se esiste qualche funzione che considera i vari casi possibili
-  return std::polar(r, psi);  //polar costruisce un exp complesso
+  double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY.
+  return std::complex{x,y};
 }
 
 double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
@@ -185,9 +71,6 @@ double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
   double x = cosAll/n;
   double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
   return std::sqrt(x*x + y*y);
-
-  //return sqrt(Firefly::orderParameter(system).real()*Firefly::orderParameter(system).real() + 
-  //Firefly::orderParameter(system).imag()*Firefly::orderParameter(system).imag()) ;
 }
 
 void Firefly::evolve(std::vector<Firefly>& syst, double dt, bool interaction) {
@@ -201,10 +84,132 @@ void Firefly::evolve(std::vector<Firefly>& syst, double dt, bool interaction) {
   if (interaction) {
     for (int i = 0; i < size; i++) {
       //interact
-      std::vector<Firefly> newsciame = syst;  
-      newsciame.erase(newsciame.begin() +i);
-      syst[i].interact(newsciame, dt);
+      std::vector<Firefly> newsyst = syst;  
+      newsyst.erase(newsyst.begin() +i);
+      syst[i].interact(newsyst, dt);
     }
+  }
+}
+
+void Firefly::draw(std::vector<Firefly>& syst) {
+  int drawSize = 5;
+
+  //load font
+  sf::Font arial;
+  if (!arial.loadFromFile("arial.ttf"))
+    std::cerr << "ERR(21): Couldn't load font. Check if font is present in working folder.\n";
+  
+  //create static text
+  sf::String staticText = "Press 'R' to add a random firefly (random position, phase and frequency).\n"; //Da fare: "according to ... distribution"
+  staticText += "Press 'S' to show/hide not-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n";
+  sf::Text text(staticText, arial, 12);
+  
+  //variables for events managing
+  bool showOff = false;     //show/hide not-flashing (off) fireflies
+  double addFrequency = 1;  //frequency of the new added firefly
+  double interact = false;  //toggle interaction
+
+  sf::Clock clock;
+  sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies");
+
+  //main loop (or game loop)
+  while (window.isOpen())
+  {
+    //reacts to Events
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+      if (event.type == sf::Event::Closed) 
+        window.close();
+
+      if (event.type == sf::Event::Resized) {
+        //view changes with window. Doing so, instead of squeezing/stretchin things, more things will be shown when resizing.
+        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+        window.setView(sf::View(visibleArea));
+        
+        //Let the place where fireflies spawn be the same of the window
+        Firefly::setWindowDim(event.size.width, event.size.height);
+      }
+
+      if (event.type == sf::Event::KeyPressed) {
+        
+        //R : add a random firefly
+        if (event.key.code == sf::Keyboard::R)    //Da fare: according to ... distribution
+        {
+          Firefly temp; //da fare: Firefly temp(dist)
+          syst.push_back(temp);
+        }
+
+        //S : show/hide not-flashing fireflies
+        if (event.key.code == sf::Keyboard::S)  
+          showOff = !showOff;
+
+        //P / M : change frequency of added firefly
+        if (event.key.code == sf::Keyboard::P)
+          addFrequency++;
+        if (event.key.code == sf::Keyboard::M) {
+          if (addFrequency > -1)
+            addFrequency--;
+        }
+
+        //I : toggle interraction
+        if (event.key.code == sf::Keyboard::I)
+        {
+          interact = !interact;
+        }
+      }
+
+      //Change dimension of fireflies
+      if (event.type == sf::Event::MouseWheelScrolled) {
+        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+          if (drawSize + event.mouseWheelScroll.delta > 1)
+            drawSize += event.mouseWheelScroll.delta;
+        }
+      }
+
+      //Add a fireflies
+      if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+          Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
+          syst.push_back(temp);
+        }
+      }
+    }
+
+    window.clear(); //clear with default color (black)
+
+    //draw fireflies
+    int N = syst.size();
+    for (int i = 0; i < N; i++) {
+      sf::CircleShape circle(drawSize);
+      circle.setPosition(syst[i].position());
+
+      if (std::sin(syst[i].phase()) > 0.9) {  //da fare meglio. Facendo così le più lente stanno anche accese per più tempo.
+        circle.setFillColor(sf::Color::Yellow);
+        window.draw(circle);
+      }
+      else if (showOff) {
+        circle.setFillColor(sf::Color(120,120,120));  //gray
+        window.draw(circle);
+      }
+    }
+
+    //draw static text
+    window.draw(text);
+
+    //draw dinamic (changing) text
+    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(interact) +
+    ")\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(syst));
+    sf::Text dText(dString, arial,12);
+    window.draw(dText);
+
+    //refresh display
+    window.display();
+    sf::Time elapsed = clock.restart();
+
+    //evolve
+    Firefly::evolve(syst, elapsed.asSeconds(), interact);
+
   }
 }
 
@@ -220,12 +225,4 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2u& vector) {
 
 bool operator>=(sf::Vector2f& lhs, sf::Vector2f& rhs) {
   return lhs.x >= rhs.x || lhs.y >= rhs.y;
-}
-
-bool operator<(Firefly& lhs, Firefly& rhs) {
-  if (lhs.position().y < rhs.position().y)
-    return true;
-  if (lhs.position().y == rhs.position().y && lhs.position().x < rhs.position().x)
-    return true;
-  return false;
 }

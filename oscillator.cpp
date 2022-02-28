@@ -89,7 +89,7 @@ Oscillator::Oscillator(Distribution dist, double mean, double param) {
   }
   _freq = randomX;
 
-  //generate phase randomly
+  //generate random phase
   std::random_device seedPhase;   
   std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
   _phase = phaseDist(seedPhase);
