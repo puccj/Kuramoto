@@ -58,7 +58,7 @@ std::complex<double> Firefly::orderParameter(std::vector<Firefly>& system) {
   }
   double x = cosAll/n;
   double y = sinAll/n;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY.
-  return std::complex{x,y};
+  return std::complex<double>{x,y};
 }
 
 double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
