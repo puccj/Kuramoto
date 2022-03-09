@@ -105,7 +105,7 @@ void Oscillator::setPhase(double phase) {
   _phase = phase;
 }
 
-void Oscillator::evolve(double dt) {   
+void Oscillator::update(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
 }
 

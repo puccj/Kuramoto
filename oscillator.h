@@ -29,7 +29,7 @@ class Oscillator {
   void setPhase(double phase);
   
   //evolve the oscillator's dinamic considering dt seconds have passed.
-  void evolve(double dt);
+  void update(double dt);
 };
 
 //returns "[random]" if num == -1. Else returns std::to_string(num).

@@ -2,10 +2,12 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <fstream>
 
 sf::Vector2f Firefly::_windowDim = sf::Vector2f(1000, 700);
 double Firefly::_K = 1;
 bool Firefly::_interaction = false;
+bool Firefly::_evolve = true;
 
 void Firefly::interact(std::vector<Firefly>& system, double dt) {
   int size = system.size();
@@ -90,16 +92,19 @@ double Firefly::angleOrderParameter(std::vector<Firefly>& system) {
   return angle;
 }
 
-void Firefly::evolve(std::vector<Firefly>& syst) {
+void Firefly::evolve(std::vector<Firefly>& syst, bool saveData) {
   int size = syst.size();
   sf::Clock clock;
 
-  while(true) {
-    double dt = 0;
+  double time = 0;
+  std::fstream fout("r-t data.txt", std::ios::out);
+
+  double dt = 0;
+  while(_evolve) {
     dt = clock.restart().asSeconds();
     for (int i = 0; i < size; i++) {
-      //evolve
-      syst[i].Oscillator::evolve(dt);
+      //update
+      syst[i].Oscillator::update(dt);
     }
 
     if (_interaction) {
@@ -109,8 +114,17 @@ void Firefly::evolve(std::vector<Firefly>& syst) {
         //newsyst.erase(newsyst.begin() +i);
         syst[i].interact(syst, dt);
       }
+
+      if (saveData) {
+        std::cout << "Saving data\n";
+        fout << time << '\t' << moduleOrderParameter(syst) << '\n';
+        time += dt;
+      }
     }
-  }
+  } //end while
+  
+  fout.close();
+  std::cout << "Data saved\n";
 }
 
 void Firefly::draw(std::vector<Firefly>& syst) {
@@ -131,7 +145,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
   double addFrequency = 1;  //frequency of the new added firefly
 
   sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies");
-  window.setFramerateLimit(30);
+  window.setFramerateLimit(30);   //less lag
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -235,7 +249,7 @@ void Firefly::plot(std::vector<Firefly>& syst) {
 
   //create window
   sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
-  window.setVerticalSyncEnabled(true); //less lag
+  window.setFramerateLimit(30); //less lag
 
   //load font
   sf::Font arial;

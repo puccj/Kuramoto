@@ -8,7 +8,8 @@ class Firefly : public Oscillator {
   static double _K;               //coupling strength between firefly
   static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the grid where fireflies will be placed
   sf::Vector2f _position;         //position of firefly on the grid
-  static bool _interaction;        //toggle interaction between fireflies
+  static bool _interaction;       //toggle interaction between fireflies
+  static bool _evolve;            //to decide when to stop evolving
 
   //makes the firefly (its oscillator) interact with the others
   void interact(std::vector<Firefly>& system, double dt);
@@ -32,8 +33,11 @@ class Firefly : public Oscillator {
 
   //void move();   // Da fare: magari con tot velocità ( (static) Vector2f)
 
-  //calls evolve and interact for each element of the vector
-  static void evolve(std::vector<Firefly>& syst);
+  //calls update and interact for each element of the vector
+  static void evolve(std::vector<Firefly>& syst, bool saveData = true);
+
+  //break out from evolve loop
+  static void stopEvolve() { _evolve = false; }
 
   //draw the system
   static void draw(std::vector<Firefly>& syst);
