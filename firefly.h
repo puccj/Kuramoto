@@ -28,6 +28,7 @@ class Firefly : public Oscillator {
   //returns r: order parameter
   static std::complex<double> orderParameter(std::vector<Firefly>& system);
   static double moduleOrderParameter(std::vector<Firefly>& system);
+  static double angleOrderParameter(std::vector<Firefly>& system);
 
   //void move();   // Da fare: magari con tot velocità ( (static) Vector2f)
 

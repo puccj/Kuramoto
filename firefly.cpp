@@ -74,6 +74,22 @@ double Firefly::moduleOrderParameter(std::vector<Firefly>& system) {
   return std::sqrt(x*x + y*y);
 }
 
+double Firefly::angleOrderParameter(std::vector<Firefly>& system) {
+  double cosAll = 0;
+  double sinAll = 0;
+  int n = system.size();
+  for (int i = 0; i < n; i++) {
+    cosAll += std::cos(system[i].phase());
+    sinAll += std::sin(system[i].phase());
+  }
+  double x = cosAll/n;
+  double y = sinAll/n;
+  double angle = std::atan(y/x)*180/M_PI;
+  if (x < 0)
+    angle += 180;
+  return angle;
+}
+
 void Firefly::evolve(std::vector<Firefly>& syst) {
   int size = syst.size();
   sf::Clock clock;
@@ -203,8 +219,7 @@ void Firefly::draw(std::vector<Firefly>& syst) {
     window.draw(text);
 
     //draw dinamic (changing) text
-    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(_interaction) +
-    ")\nOrder parameter: r = " + std::to_string(Firefly::moduleOrderParameter(syst));
+    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(_interaction) + ')';
     sf::Text dText(dString, arial,12);
     window.draw(dText);
 
@@ -214,12 +229,37 @@ void Firefly::draw(std::vector<Firefly>& syst) {
 }
 
 void Firefly::plot(std::vector<Firefly>& syst) {
-  int windowSize = 300;
-  int radius = 5;
+  int windowSize = 500;
+  int radius = 1;
   int dim = windowSize + radius*2;
+
+  //create window
   sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
-  window.setPosition(sf::Vector2i(_windowDim));
-  window.setFramerateLimit(30); //less lag
+  window.setVerticalSyncEnabled(true); //less lag
+
+  //load font
+  sf::Font arial;
+  if (!arial.loadFromFile("arial.ttf"))
+    std::cerr << "ERR(32): Couldn't load font. Check if font is present in working folder.\n";
+
+  //setting background
+  sf::RectangleShape xAxis(sf::Vector2f(dim,1));
+  xAxis.setPosition(0, dim/2);
+  xAxis.setFillColor(sf::Color(130,130,130));
+  sf::RectangleShape yAxis(sf::Vector2f(1,dim));
+  yAxis.setPosition(dim/2, 0);
+  yAxis.setFillColor(sf::Color(130,130,130));
+  sf::Text xText("cos θ", arial, 12);
+  xText.setPosition(sf::Vector2f(dim-30, dim/2 + 10));
+  xText.setFillColor(sf::Color::Black);
+  sf::Text yText("sin θ", arial, 12);
+  yText.setPosition(sf::Vector2f(dim/2 -10, 30));
+  yText.setFillColor(sf::Color::Black);
+  yText.rotate(270);
+
+  //circle for fireflies
+  sf::CircleShape circle(radius);
+  circle.setFillColor(sf::Color::Black);  
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -238,16 +278,31 @@ void Firefly::plot(std::vector<Firefly>& syst) {
       }
     }
 
-    window.clear();
+    window.clear(sf::Color::White);
+    window.draw(xAxis);
+    window.draw(yAxis);
+    window.draw(xText);
+    window.draw(yText);
 
     //draw oscillators
     int size = syst.size();
     for (int i = 0; i < size; i++) {
-      sf::CircleShape circle(radius);
       double phase = syst[i].phase();
       circle.setPosition( (std::cos(phase)+1)*windowSize/2 , (std::sin(phase)+1)*windowSize/2 );
       window.draw(circle);
     }
+
+    //draw text
+    sf::Text text("Order parameter: |r| = " + std::to_string(Firefly::moduleOrderParameter(syst)),arial,12);
+    text.setFillColor(sf::Color::Black);
+    window.draw(text);
+
+    //draw arrow (r)
+    sf::RectangleShape line(sf::Vector2f(moduleOrderParameter(syst)*dim/2, 2));
+    line.setPosition(dim/2, dim/2 +1);
+    line.setFillColor(sf::Color::Black);
+    line.rotate(angleOrderParameter(syst));
+    window.draw(line);
 
     //refresh display
     window.display();
