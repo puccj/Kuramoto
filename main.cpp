@@ -7,7 +7,7 @@ int main() {
   XInitThreads();  //serve per XServer
 
   Firefly::setWindowDim(1000,700);
-  Firefly::setK(200);
+  Firefly::setK(2000);
 
   std::vector<Firefly> sciame;
   for (int i = 0; i < 1000; i++) {
