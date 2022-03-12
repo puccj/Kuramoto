@@ -4,7 +4,7 @@
 
 int main() {
   Firefly::setWindowDim(1000,700);
-  Firefly::setK(10);
+  //Firefly::setK(8);
 
   std::vector<Firefly> sciame;
   for (int i = 0; i < 1000; i++) {
@@ -16,14 +16,16 @@ int main() {
   //std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
   
   //Draw window, plot window and evolve done in separeted threads, passing sciame as reference
-  std::thread dThread(&Firefly::draw, std::ref(sciame));  
-  std::thread pThread(&Firefly::plot, std::ref(sciame));
-  std::thread eThread(&Firefly::evolve, std::ref(sciame), true);
+  //std::thread dThread(&Firefly::draw, std::ref(sciame));  
+  //std::thread pThread(&Firefly::plot, std::ref(sciame));
+
+  Firefly::rkGraph(sciame, 0, 7, 0.1, 1, true);
+  //std::thread eThread(&Firefly::evolve, std::ref(sciame), true);
 
   //wait for threads to terminate before proceding
-  dThread.join(); 
-  pThread.join();
-  Firefly::stopEvolve();
-  eThread.join();
+  //dThread.join(); 
+  //pThread.join();
+  //Firefly::stopEvolve();
+  //eThread.join();
   return 0;
 }

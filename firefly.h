@@ -6,10 +6,10 @@
 
 class Firefly : public Oscillator {
   static double _K;               //coupling strength between firefly
-  static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the grid where fireflies will be placed
-  sf::Vector2f _position;         //position of firefly on the grid
+  static sf::Vector2f _windowDim; //dimension (pixels, (x,y)) of the window where fireflies will be placed
   static bool _interaction;       //toggle interaction between fireflies
   static bool _evolve;            //to decide when to stop evolving
+  sf::Vector2f _position;         //position of firefly on the window
 
   //makes the firefly (its oscillator) interact with the others
   void interact(std::vector<Firefly>& system, double dt);
@@ -44,6 +44,10 @@ class Firefly : public Oscillator {
 
   //plot the oscillators in a complex plane
   static void plot(std::vector<Firefly>& syst);
+
+  //make more simulations with different K and save the average of last values of r
+  //speedFactor make the simulations run faster (or slower if < 1), spacing more the time between each step
+  static void rkGraph(std::vector<Firefly>& syst, double kMin, double kMax, double kIncrement = 0.1, double speedFactor = 1, bool saveRT = false);
 };
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector);

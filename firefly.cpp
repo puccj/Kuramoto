@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include <fstream>
+#include <thread>
 
 sf::Vector2f Firefly::_windowDim = sf::Vector2f(1000, 700);
 double Firefly::_K = 1;
@@ -93,11 +94,15 @@ double Firefly::angleOrderParameter(std::vector<Firefly>& system) {
 }
 
 void Firefly::evolve(std::vector<Firefly>& syst, bool saveData) {
+  _evolve = true;
+
   int size = syst.size();
   sf::Clock clock;
 
   double time = 0;
-  std::fstream fout("r-t data.txt", std::ios::out);
+  std::fstream fout;
+  if (saveData)
+    fout.open("data/r-t data.txt", std::ios::out);
 
   double dt = 0;
   while(_evolve) {
@@ -110,13 +115,11 @@ void Firefly::evolve(std::vector<Firefly>& syst, bool saveData) {
     if (_interaction) {
       for (int i = 0; i < size; i++) {
         //interact
-        //std::vector<Firefly> newsyst = syst;  
-        //newsyst.erase(newsyst.begin() +i);
         syst[i].interact(syst, dt);
       }
 
       if (saveData) {
-        std::cout << "Saving data\n";
+        //std::cout << "Saving data\n";
         fout << time << '\t' << moduleOrderParameter(syst) << '\n';
         time += dt;
       }
@@ -124,7 +127,7 @@ void Firefly::evolve(std::vector<Firefly>& syst, bool saveData) {
   } //end while
   
   fout.close();
-  std::cout << "Data saved\n";
+  std::cout << "r-t data saved\n";
 }
 
 void Firefly::draw(std::vector<Firefly>& syst) {
@@ -321,7 +324,69 @@ void Firefly::plot(std::vector<Firefly>& syst) {
     //refresh display
     window.display();
   }
+}
 
+void Firefly::rkGraph(std::vector<Firefly>& syst, double kMin, double kMax, double kIncrement, double speedFactor, bool saveRT) {
+  _interaction = true;
+
+  if (kMin > kMax) {
+    std::cerr << "WARN(21): You set kMin higher than kMax, I'm swapping them\n";
+    double t = kMin;
+    kMin = kMax;
+    kMax = t;
+  }
+
+  //copy the begin state of the system before evolving it and preparing the file
+  std::vector<Firefly> beginSyst(syst);
+  std::fstream rkOut;
+  rkOut.open("data/r-k data.txt", std::ios::out);
+
+  //cicle throw different values of K
+  for (double kValue = kMin; kValue < kMax; kValue += kIncrement) {
+    std::fstream rtOut;
+    if (saveRT)
+      rtOut.open("data/r-t data (K = " + std::to_string(kValue) + ").txt", std::ios::out);
+
+    Firefly::setK(kValue);
+    int size = syst.size();
+    sf::Clock clock;
+    double time = 0;
+    double dt = 0;
+    double sum = 0;
+    double steps = 0;
+
+    //evolve untill time < 12
+    while(time < 12) {
+      dt = clock.restart().asSeconds() *speedFactor;
+      for (int i = 0; i < size; i++)    //update
+        syst[i].Oscillator::update(dt); 
+      for (int i = 0; i < size; i++)    //interact
+        syst[i].interact(syst, dt);   
+      time += dt;
+
+      //average values of K from time=6 to time=12
+      if (time > 6) {
+        sum += moduleOrderParameter(syst);
+        steps++;
+      }
+
+      if (saveRT) {
+        //std::cout << "Saving data\n";
+        rtOut << time << '\t' << moduleOrderParameter(syst) << '\n';
+        time += dt;
+      }
+    } //end while
+
+    //done r-t, save average |r|
+    rtOut.close();
+    rkOut << kValue << '\t' << sum/steps << '\n';
+    std::cout << "Done K = " << kValue << '\n';
+
+    //reset the system
+    syst = beginSyst;
+  }
+  rkOut.close();
+  std::cout << "r-k data saved\n";
 }
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
