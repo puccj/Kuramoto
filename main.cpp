@@ -1,8 +1,11 @@
 #include "firefly.h"
 #include <thread>
 #include <iostream>
+#include <X11/Xlib.h> 
 
 int main() {
+  XInitThreads();  //serve per XServer
+
   Firefly::setWindowDim(1000,700);
   //Firefly::setK(8);
 
