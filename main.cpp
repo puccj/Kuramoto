@@ -1,34 +1,28 @@
-#include "firefly.h"
+#include "swarm.h"
 #include <thread>
 #include <iostream>
-#include <X11/Xlib.h> 
+//#include <X11/Xlib.h> 
 
 int main() {
-  XInitThreads();  //serve per XServer
+  //XInitThreads();  //serve per XServer
 
-  Firefly::setWindowDim(1000,700);
-  //Firefly::setK(8);
-
-  std::vector<Firefly> sciame;
-  for (int i = 0; i < 1000; i++) {
-    sciame.push_back(Firefly(Distribution::Lorentz,1,0.5));
-    //sciame.push_back(Firefly(0.2));
-  }
-
-  //fout.close();
-  //std::cout << "Kc: " << 2/(M_PI*lorentz_g(0,1,0.5));
+  Swarm primo(1000, Distribution{DistName::Lorentz, 1, 0.5});
   
-  //Draw window, plot window and evolve done in separeted threads, passing sciame as reference
-  //std::thread dThread(&Firefly::draw, std::ref(sciame));  
-  //std::thread pThread(&Firefly::plot, std::ref(sciame));
+  //primo.setWindowDim(1000,700);
+  //primo.setK(8);
 
-  Firefly::rkGraph(sciame, 0, 7, 0.1, 1, true);
-  //std::thread eThread(&Firefly::evolve, std::ref(sciame), true);
+  //Draw window, plot window and evolve done in separeted threads
+  //std::thread dThread(&Swarm::draw, &primo);
+  //std::thread pThread(&Swarm::plot, &primo);
+  //std::thread eThread(&Swarm::evolve, &primo);
 
   //wait for threads to terminate before proceding
   //dThread.join(); 
   //pThread.join();
-  //Firefly::stopEvolve();
+  //primo.stopEvolve();
   //eThread.join();
+
+  //primo.rkGraph(sciame, 0, 7, 0.1, 1, true);
+
   return 0;
 }
