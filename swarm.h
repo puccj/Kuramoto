@@ -1,36 +1,3 @@
-#ifndef THR_HANDLER
-#define THR_HANDLER
-
-#include <thread>
-#include <iostream>
-#include <vector>
-
-namespace thrHandler
-{
-  struct Thread {
-    std::thread::id thrID;  //thread ID
-    std::string swarmName;  //which swarm the thread handle (by its name)
-  };
-  extern std::vector<Thread> list;             //list of every thread
-  extern std::vector<std::thread::id> paused;  //list of paused threads
-
-  //add/remove a thread to/from the list
-  extern void add(std::thread::id thrID, std::string swarmName);
-  //void remove(std::thread::id thrID); //No need for that in this case
-
-  //pause every thread containing the same swarm of currentThread.
-  extern void take(std::thread::id currentThreadID);
-
-  //unpause paused threads
-  extern void release();
-
-  //returns true if the thread with thrID doesn't need to be paused
-  extern bool ready(std::thread::id thrID);
-
-} // namespace ThrHandler
-
-#endif //THR_HANDLER
-
 #ifndef SWARM_H
 #define SWARM_H
 
@@ -89,7 +56,7 @@ class Swarm {
   void rkGraph(double kMin, double kMax, double kIncrement = 0.1, double speedFactor = 1, bool saveRT = false);
   
   //Swarm& operator=(Swarm const& other);
-  void push_back(Firefly const& add);
+  //void push_back(Firefly const& add); //funziona ma fa crashare con multi threads.
 };
 
 

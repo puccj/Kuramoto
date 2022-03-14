@@ -20,7 +20,7 @@ Firefly::Firefly(Distribution dist, sf::Vector2f position) : Oscillator(dist), _
   }*/
 }
 
-Firefly::Firefly(double freq, double phase, sf::Vector2f position): Oscillator(freq, phase), _position{position} { 
+Firefly::Firefly(double freq, sf::Vector2f position): Oscillator(freq), _position{position} { 
 /*  if (position >= _windowDim) {
     std::cerr << "WARN (12): position value is too high for the set window dimensions: using a random position instead.\n";
     std::cerr << "Use Firefly::setWindowDim static function if you want to change the window dimensions\n";

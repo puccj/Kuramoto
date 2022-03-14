@@ -3,46 +3,6 @@
 #include <fstream>
 #include <random>
 
-namespace thrHandler
-{
-  std::vector<Thread> list = {};
-  std::vector<std::thread::id> paused = {};
-
-  void add(std::thread::id thrID, std::string swarmName) { 
-    list.push_back({thrID,swarmName});
-  }
-
-  void take(std::thread::id currentThreadID) {
-    std::string swarmUsed;
-    int size = list.size();
-    for (int i = 0; i < size; i++) {
-      if (currentThreadID == list[i].thrID) {
-        swarmUsed = list[i].swarmName;
-        break;
-      }
-    }
-
-    for (int i = 0; i < size; i++) {
-      if (list[i].swarmName == swarmUsed && list[i].thrID != currentThreadID) {
-        paused.push_back(list[i].thrID);
-      }
-    }
-  }
-  
-  void release() { 
-    paused = {};
-  }
-
-  bool ready(std::thread::id thrID) {
-    int size = paused.size();
-    for (int i = 0; i < size; i++) {
-      if (thrID == paused[i]);
-        return false;
-    }
-    return true;
-  }
-}
-
 void Swarm::interact(Firefly& chosen, double dt) {
   double sumSinDiff = 0;
   double phase = chosen.phase();
@@ -70,10 +30,13 @@ Swarm::Swarm(int size, Distribution dist, std::string name) : _size(size), _data
 
 Swarm::Swarm(int size, double freq, std::string name) : _size{size}, _data{new Firefly[_size]}, _name{name} {
   for (int i = 0; i < _size; i++) {
-    _data[i] = Firefly(freq);
+    std::random_device seed;
+    std::uniform_int_distribution<int> distX(0, _windowDim.x);
+    std::uniform_int_distribution<int> distY(0, _windowDim.y);
+    _data[i] = Firefly(freq, sf::Vector2f(distX(seed),distY(seed)));
   }
 
-  if (name == "defalt") {
+  if (name == "default") {
     _name = std::to_string(size) + '-' + std::to_string(freq) + "Hz";
   }
 }
@@ -140,15 +103,10 @@ void Swarm::evolve(bool saveData) {
   double time = 0;
   std::fstream fout;
   if (saveData)
-    fout.open("data/r-t data.txt", std::ios::out);
+    fout.open(".\\data\\" + _name + "r-t_data.txt", std::ios::out);
 
   double dt = 0;
-  while(_evolve) {
-    while (!thrHandler::ready(std::this_thread::get_id())) {
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(500ms);
-    }
-    
+  while(_evolve) {    
     dt = clock.restart().asSeconds();
     for (int i = 0; i < _size; i++) {
       //update
@@ -169,8 +127,10 @@ void Swarm::evolve(bool saveData) {
     }
   } //end while
   
-  fout.close();
-  std::cout << "r-t data saved\n";
+  if (saveData) {
+    fout.close();
+    std::cout << "r-t data saved\n";
+  }
 }
 
 void Swarm::draw() {
@@ -190,7 +150,7 @@ void Swarm::draw() {
   bool showOff = false;     //show/hide not-flashing (off) fireflies
   double addFrequency = 1;  //frequency of the new added firefly
 
-  sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies");
+  sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies: " + _name);
   window.setFramerateLimit(30);   //less lag
 
   //main loop (or game loop)
@@ -214,16 +174,23 @@ void Swarm::draw() {
 
       if (event.type == sf::Event::KeyPressed) {
         
+        //S : show/hide not-flashing fireflies
+        if (event.key.code == sf::Keyboard::S)  
+          showOff = !showOff;
+
+        //I : toggle interraction
+        if (event.key.code == sf::Keyboard::I)
+        {
+          _interaction = !_interaction;
+        }
+
+        /*Crashes sometimes. Due to bad managing of multi threads
         //R : add a random firefly
         if (event.key.code == sf::Keyboard::R)    //Da fare: according to ... distribution
         {
           Firefly temp; //da fare: Firefly temp(dist)
           push_back(temp);
         }
-
-        //S : show/hide not-flashing fireflies
-        if (event.key.code == sf::Keyboard::S)  
-          showOff = !showOff;
 
         //P / M : change frequency of added firefly
         if (event.key.code == sf::Keyboard::P)
@@ -232,12 +199,7 @@ void Swarm::draw() {
           if (addFrequency > -1)
             addFrequency--;
         }
-
-        //I : toggle interraction
-        if (event.key.code == sf::Keyboard::I)
-        {
-          _interaction = !_interaction;
-        }
+        */
       }
       
       if (window.hasFocus()) {
@@ -249,13 +211,14 @@ void Swarm::draw() {
           }
         }
 
-        //Add a fireflies
+        /*Crashes sometimes. Due to bad managing of multi threads
+        //Add a fireflies 
         if (event.type == sf::Event::MouseButtonPressed) {
           if (event.mouseButton.button == sf::Mouse::Left) {
             Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
             push_back(temp);
           }
-        }
+        }*/
       }
     } //end react to events
 
@@ -295,7 +258,7 @@ void Swarm::plot() {
   int dim = windowSize + radius*2;
 
   //create window
-  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot");    //Deve essere non-resizable o comunque deve rimanere quadrata
+  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot: " + _name);    //Deve essere non-resizable o comunque deve rimanere quadrata
   window.setFramerateLimit(30); //less lag
 
   //load font
@@ -345,12 +308,6 @@ void Swarm::plot() {
     window.draw(xText);
     window.draw(yText);
 
-    //wait untill ready
-    while (!thrHandler::ready(std::this_thread::get_id())) {
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(1000ms);
-    }
-
     //draw oscillators
     for (int i = 0; i < _size; i++) {
       double phase = _data[i].phase();
@@ -389,13 +346,13 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
   //copy the begin state of the system before evolving it and preparing the file
   Swarm beginSyst = *this;
   std::fstream rkOut;
-  rkOut.open("data/r-k data.txt", std::ios::out);
+  rkOut.open(".\\data\\" + _name + "r-k data.txt" , std::ios::out);
 
   //cicle throw different values of K
   for (double kValue = kMin; kValue < kMax; kValue += kIncrement) {
     std::fstream rtOut;
     if (saveRT)
-      rtOut.open("data/r-t data (K = " + std::to_string(kValue) + ").txt", std::ios::out);
+      rtOut.open(".\\data\\" + _name + "r-t_data(K=" + std::to_string(kValue) + ").txt", std::ios::out);
 
     setK(kValue);
     sf::Clock clock;
@@ -448,15 +405,14 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
   return *this;
 }*/
 
+/*
 void Swarm::push_back(Firefly const& add) {
   Firefly temp[_size+1];
   std::copy(_data, _data + _size, temp);
   temp[_size] = add;
   _size++;
   
-  thrHandler::take(std::this_thread::get_id()); //pause other threads before deleting data
   delete[] _data;
   _data = new Firefly[_size];
   std::copy(temp, temp + _size, _data); 
-  thrHandler::release();    //unpause other threads.
-}
+}*/

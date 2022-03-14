@@ -24,22 +24,16 @@ int main() {
   primo.setK(10);
   secondo.setK(1);
 
+/*
   //Draw window, plot window and evolve done in separeted threads
   std::thread primoDrawThr(&draw, std::ref(primo));
   std::thread primoPlotThr(&plot, std::ref(primo));
-  std::thread primoEvolveThr(&evolve, std::ref(primo), false);
+  std::thread primoEvolveThr(&evolve, std::ref(primo), true);
 
-  //add them to thrHandler (Da fare: in automatico)
-  thrHandler::add(primoDrawThr.get_id(), primo.name());
-  thrHandler::add(primoPlotThr.get_id(), primo.name());
-  thrHandler::add(primoEvolveThr.get_id(), primo.name());
-
+/*
   std::thread secondoDrawThr(&draw, std::ref(secondo));
   std::thread secondoPlotThr(&plot, std::ref(secondo));
   std::thread secondoEvolveThr(&evolve, std::ref(secondo), false);
-  thrHandler::add(secondoDrawThr.get_id(), secondo.name());
-  thrHandler::add(secondoPlotThr.get_id(), secondo.name());
-  thrHandler::add(secondoEvolveThr.get_id(), secondo.name());
 
   //wait for threads to terminate before proceding
   primoDrawThr.join(); 
@@ -47,11 +41,13 @@ int main() {
   primo.stopEvolve();
   primoEvolveThr.join();
 
+
   secondoDrawThr.join(); 
   secondoPlotThr.join();
   secondo.stopEvolve();
   secondoEvolveThr.join();
-  //primo.rkGraph(sciame, 0, 7, 0.1, 1, true);
+*/
+  primo.rkGraph(0, 7, 0.1, 1, true);
 
   return 0;
 }
