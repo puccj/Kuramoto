@@ -2,8 +2,76 @@
 #include <vector>
 #include <random>
 #include <iostream>
+#include "swarm.h"
+
 using namespace std::complex_literals;
 
+Distribution::Distribution(DistName name, double mean, double param) : _name{name}, _mean{mean}, _param{param} {
+  if (param == 998) {
+    switch (name) {
+     case DistName::Lorentz:
+      param = 0.5;
+      break;
+     case DistName::Gauss:
+      param = 1;
+      break;
+     case DistName::Boltzmann:
+      param = 2;
+      break;
+    }
+  }
+  if (name == DistName::Lorentz && param < 0)
+    param = -param;
+}
+
+double Distribution::evaluate(double freq) {
+  switch (_name) {
+   case DistName::Lorentz:
+    return _param / ( M_PI* (_param*_param + (freq-_mean)*(freq-_mean)) );
+   case DistName::Gauss:
+    return std::exp( (freq-_mean)*(freq-_mean) / (-2*_param)) / sqrt(2*M_PI*_param);
+   case DistName::Boltzmann:
+    return std::exp(-freq/_param);
+   case DistName::Exp:
+    return std::exp(-freq/_mean) / _mean;
+  }
+  return -1;
+}
+
+double Distribution::max() {
+  switch (_name) {
+   case DistName::Lorentz:
+   case DistName::Gauss:
+    return evaluate(_mean); 
+   case DistName::Boltzmann:
+   case DistName::Exp:
+    return evaluate(0);
+  }
+  return -1;
+}
+
+std::string Distribution::toString() {
+  std::string result;
+  switch (_name) {
+   case DistName::Lorentz:
+    result = "Lorentz";
+    break;
+   case DistName::Gauss:
+    result = "Gauss";
+    break; 
+   case DistName::Boltzmann:
+    result = "Boltzmann";
+    break;
+   case DistName::Exp:
+    result = "Exp";
+    break;
+  }
+
+  result += ',' + std::to_string(_mean) + ',' + std::to_string(_param);
+  return result;
+}
+
+/*
 double lorentz_g(double freq, double mean, double gamma){
   if(gamma < 0) { gamma = -gamma; }
   if(gamma > 1) { 
@@ -27,7 +95,6 @@ double gauss_g(double freq, double mean, double sigma){
 *sono maggiormente distribuite vicino a Omega (che sarebbe la frequenza media caratteristica del sistema) e la 
 *probabilità di avere freq>Omega diminuisce esponenzialmente. La media è Omega^2. Problema che ho realizzato dopo avere scritto tutto: non è simmetrica 
 *rispetto all'origine, quindi succederà un macello? da vedere
-*/
 double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
   if (Omega == 998)
     Omega = 2;    //Qualcosa di accettabile
@@ -36,7 +103,7 @@ double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution,
 
 double exp_g(double freq, double mean) {  //questa che sarebbe? //Sarebbe un'esponenziale decrescente. L'ho messa così a caso
   return std::exp(-freq/mean) / mean;
-}
+}*/
 
 Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
   if (phase == -1) {
@@ -49,44 +116,18 @@ Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
   setPhase(phase);
 }
 
-Oscillator::Oscillator(Distribution dist, double mean, double param) {
+Oscillator::Oscillator(Distribution dist) {
   //generate random frequency according to the selected distribution  
   double randomX;
   double randomY;
   std::random_device seed;
-  
-  if (dist == Distribution::Lorentz) {
-    std::uniform_real_distribution<double> xDist(-4,4);
-    std::uniform_real_distribution<double> yDist(0, lorentz_g(0,0, param));   //max is for freq = 0 when mean = 0
-    do {
-      randomX = xDist(seed);
-      randomY = yDist(seed);
-    } while (randomY > lorentz_g(randomX, mean, param));
-  }
-  else if (dist == Distribution::Gauss) {
-    std::uniform_real_distribution<double> xDist(-4,4);
-    std::uniform_real_distribution<double> yDist(0, gauss_g(0, 0, param));
-    do {
-      randomX = xDist(seed);
-      randomY = yDist(seed);
-    } while (randomY > gauss_g(randomX, mean, param));
-  }
-  else if (dist == Distribution::Boltzmann) {
-    std::uniform_real_distribution<double> xDist(-4,4);   //il min e max della x
-    std::uniform_real_distribution<double> yDist(0, 50);  //da calcolare il max (di boltzmann)
-    do {
-      randomX = xDist(seed);
-      randomY = yDist(seed);
-    } while (randomY > boltzmann_g(randomX, param));
-  }
-  else if (dist == Distribution::Expo) {
-    std::uniform_real_distribution<double> xDist(0,4);  //da calcolare meglio il max
-    std::uniform_real_distribution<double> yDist(0, exp_g(0, mean));
-    do {
-      randomX = xDist(seed);
-      randomY = yDist(seed);
-    } while (randomY > exp_g(randomX, mean));
-  }
+  std::uniform_real_distribution<double> xDist(-4,4);
+  std::uniform_real_distribution<double> yDist(0, dist.max());
+  do {
+    randomX = xDist(seed);
+    randomY = yDist(seed);
+  } while (randomY > dist.evaluate(randomX));
+
   _freq = randomX;
 
   //generate random phase
