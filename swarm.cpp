@@ -3,7 +3,57 @@
 #include <fstream>
 #include <random>
 
-Swarm::Swarm(int size, Distribution dist) : _size(size), _data{new Firefly[_size]} {
+namespace thrHandler
+{
+  std::vector<Thread> list = {};
+  std::vector<std::thread::id> paused = {};
+
+  void add(std::thread::id thrID, std::string swarmName) { 
+    list.push_back({thrID,swarmName});
+  }
+
+  void take(std::thread::id currentThreadID) {
+    std::string swarmUsed;
+    int size = list.size();
+    for (int i = 0; i < size; i++) {
+      if (currentThreadID == list[i].thrID) {
+        swarmUsed = list[i].swarmName;
+        break;
+      }
+    }
+
+    for (int i = 0; i < size; i++) {
+      if (list[i].swarmName == swarmUsed && list[i].thrID != currentThreadID) {
+        paused.push_back(list[i].thrID);
+      }
+    }
+  }
+  
+  void release() { 
+    paused = {};
+  }
+
+  bool ready(std::thread::id thrID) {
+    int size = paused.size();
+    for (int i = 0; i < size; i++) {
+      if (thrID == paused[i]);
+        return false;
+    }
+    return true;
+  }
+}
+
+void Swarm::interact(Firefly& chosen, double dt) {
+  double sumSinDiff = 0;
+  double phase = chosen.phase();
+  for (int i = 0; i < _size; i++) {
+    sumSinDiff += std::sin(_data[i].phase() - phase);   //theta_i - theta
+  }
+
+  chosen.setPhase(phase + (chosen.freq() + _K*sumSinDiff/_size ) * dt);  //sarebbe  phase += ()*dt + normalize
+}
+
+Swarm::Swarm(int size, Distribution dist, std::string name) : _size(size), _data{new Firefly[_size]}, _name{name} {
   for (int i = 0; i < _size; i++) {
     std::random_device seed;
     std::uniform_int_distribution<int> distX(0, _windowDim.x);
@@ -12,20 +62,34 @@ Swarm::Swarm(int size, Distribution dist) : _size(size), _data{new Firefly[_size
   }
 
   _Kc = 2 / M_PI* dist.evaluate(0);
+
+  if (name == "default") {
+    _name = std::to_string(size) + '-' + dist.toString();
+  }
 }
 
-// Swarm::Swarm(int size, Firefly data) : _size{size}, _data{new Firefly[_size]} { 
-//   std::fill(_data, _data + _size, data);
-// }
+Swarm::Swarm(int size, double freq, std::string name) : _size{size}, _data{new Firefly[_size]}, _name{name} {
+  for (int i = 0; i < _size; i++) {
+    _data[i] = Firefly(freq);
+  }
+
+  if (name == "defalt") {
+    _name = std::to_string(size) + '-' + std::to_string(freq) + "Hz";
+  }
+}
+
+/*Swarm::Swarm(int size, Firefly data) : _size{size}, _data{new Firefly[_size]} { 
+  std::fill(_data, _data + _size, data);
+}
 
 Swarm::Swarm(Swarm const& other) : _size{other._size}, _data{new Firefly[_size]} {
   std::copy(other._data, other._data + _size, _data);
-}
+}*/
 
 Firefly& Swarm::operator[](int index) {
   if (index >= _size || index < 0) {
-    std::cerr << "ERR (41): trying to access element out of bound.\n";
-    return;
+    std::cerr << "ERR (41): trying to access element out of bound. Exiting...\n";
+    exit(0);
   }
   return _data[index];
 }
@@ -80,6 +144,11 @@ void Swarm::evolve(bool saveData) {
 
   double dt = 0;
   while(_evolve) {
+    while (!thrHandler::ready(std::this_thread::get_id())) {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(500ms);
+    }
+    
     dt = clock.restart().asSeconds();
     for (int i = 0; i < _size; i++) {
       //update
@@ -89,7 +158,7 @@ void Swarm::evolve(bool saveData) {
     if (_interaction) {
       for (int i = 0; i < _size; i++) {
         //interact
-        _data[i].interact(*this, dt);
+        interact(_data[i], dt);
       }
 
       if (saveData) {
@@ -170,20 +239,22 @@ void Swarm::draw() {
           _interaction = !_interaction;
         }
       }
-
-      //Change dimension of fireflies
-      if (event.type == sf::Event::MouseWheelScrolled) {
-        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-          if (drawSize + event.mouseWheelScroll.delta > 1)
-            drawSize += event.mouseWheelScroll.delta;
+      
+      if (window.hasFocus()) {
+        //Change dimension of fireflies
+        if (event.type == sf::Event::MouseWheelScrolled) {
+          if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+            if (drawSize + event.mouseWheelScroll.delta > 1)
+              drawSize += event.mouseWheelScroll.delta;
+          }
         }
-      }
 
-      //Add a fireflies
-      if (event.type == sf::Event::MouseButtonPressed) {
-        if (event.mouseButton.button == sf::Mouse::Left) {
-          Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
-          push_back(temp);
+        //Add a fireflies
+        if (event.type == sf::Event::MouseButtonPressed) {
+          if (event.mouseButton.button == sf::Mouse::Left) {
+            Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
+            push_back(temp);
+          }
         }
       }
     } //end react to events
@@ -274,6 +345,12 @@ void Swarm::plot() {
     window.draw(xText);
     window.draw(yText);
 
+    //wait untill ready
+    while (!thrHandler::ready(std::this_thread::get_id())) {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(1000ms);
+    }
+
     //draw oscillators
     for (int i = 0; i < _size; i++) {
       double phase = _data[i].phase();
@@ -296,6 +373,7 @@ void Swarm::plot() {
     //refresh display
     window.display();
   }
+
 }
 
 void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFactor, bool saveRT) {
@@ -332,7 +410,7 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
       for (int i = 0; i < _size; i++)    //update
         _data[i].Oscillator::update(dt); 
       for (int i = 0; i < _size; i++)    //interact
-        _data[i].interact(*this, dt);   
+        interact(_data[i], dt);   
       time += dt;
 
       //average values of K from time=6 to time=12
@@ -360,7 +438,7 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
   std::cout << "r-k data saved\n";
 }
 
-Swarm& Swarm::operator=(Swarm const& other) { 
+/*Swarm& Swarm::operator=(Swarm const& other) { 
   if (this != &other) { 
     delete[] _data;
     _size = other._size;
@@ -368,14 +446,17 @@ Swarm& Swarm::operator=(Swarm const& other) {
     std::copy(other._data, other._data + _size, _data); 
   } 
   return *this;
-}
+}*/
 
 void Swarm::push_back(Firefly const& add) {
   Firefly temp[_size+1];
   std::copy(_data, _data + _size, temp);
   temp[_size] = add;
   _size++;
+  
+  thrHandler::take(std::this_thread::get_id()); //pause other threads before deleting data
   delete[] _data;
   _data = new Firefly[_size];
-  std::copy(temp, temp + _size, _data);  
+  std::copy(temp, temp + _size, _data); 
+  thrHandler::release();    //unpause other threads.
 }

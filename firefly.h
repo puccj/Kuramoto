@@ -9,8 +9,8 @@ class Firefly : public Oscillator {
 
  public:
   //if not indicated, frequencies, phases and position are set randomly
-  Firefly(double freq, double phase = -1, sf::Vector2f position = sf::Vector2f(-1,-1));
   Firefly(Distribution dist = Distribution{DistName::Lorentz, 1, 998}, sf::Vector2f position = sf::Vector2f(-1,-1));
+  Firefly(double freq, double phase = -1, sf::Vector2f position = sf::Vector2f(-1,-1));
   
   sf::Vector2f position() { return _position; }
   //void move();   // Da fare: magari con tot velocità ( (static) Vector2f)

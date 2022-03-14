@@ -3,7 +3,6 @@
 
 #include <complex>
 #include <cassert>
-#include "swarm.h"
 using namespace std::complex_literals;
 
 enum class DistName {Lorentz, Gauss, Boltzmann, Exp};
@@ -20,6 +19,7 @@ class Distribution {
   Distribution(DistName name = DistName::Lorentz, double mean = 1, double param = 988);
   double evaluate(double freq);
   double max();
+  std::string toString();   //returns (ex) "Lorentz,1,0.5"
 };
 
 class Oscillator {
@@ -39,8 +39,6 @@ class Oscillator {
   
   //evolve the oscillator's dinamic considering dt seconds have passed.
   void update(double dt);
-  //makes the oscillator interact with the others
-  void interact(Swarm& syst, double dt);
 };
 
 //returns "[random]" if num == -1. Else returns std::to_string(num).

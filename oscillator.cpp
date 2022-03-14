@@ -35,6 +35,7 @@ double Distribution::evaluate(double freq) {
    case DistName::Exp:
     return std::exp(-freq/_mean) / _mean;
   }
+  return -1;
 }
 
 double Distribution::max() {
@@ -46,8 +47,31 @@ double Distribution::max() {
    case DistName::Exp:
     return evaluate(0);
   }
+  return -1;
 }
 
+std::string Distribution::toString() {
+  std::string result;
+  switch (_name) {
+   case DistName::Lorentz:
+    result = "Lorentz";
+    break;
+   case DistName::Gauss:
+    result = "Gauss";
+    break; 
+   case DistName::Boltzmann:
+    result = "Boltzmann";
+    break;
+   case DistName::Exp:
+    result = "Exp";
+    break;
+  }
+
+  result += ',' + std::to_string(_mean) + ',' + std::to_string(_param);
+  return result;
+}
+
+/*
 double lorentz_g(double freq, double mean, double gamma){
   if(gamma < 0) { gamma = -gamma; }
   if(gamma > 1) { 
@@ -71,7 +95,6 @@ double gauss_g(double freq, double mean, double sigma){
 *sono maggiormente distribuite vicino a Omega (che sarebbe la frequenza media caratteristica del sistema) e la 
 *probabilità di avere freq>Omega diminuisce esponenzialmente. La media è Omega^2. Problema che ho realizzato dopo avere scritto tutto: non è simmetrica 
 *rispetto all'origine, quindi succederà un macello? da vedere
-*/
 double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution, frequency has the same interpretation as Energy 
   if (Omega == 998)
     Omega = 2;    //Qualcosa di accettabile
@@ -80,7 +103,7 @@ double boltzmann_g(double freq, double Omega){ //Maxwell-Boltzmann distribution,
 
 double exp_g(double freq, double mean) {  //questa che sarebbe? //Sarebbe un'esponenziale decrescente. L'ho messa così a caso
   return std::exp(-freq/mean) / mean;
-}
+}*/
 
 Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
   if (phase == -1) {
@@ -125,17 +148,6 @@ void Oscillator::setPhase(double phase) {
 
 void Oscillator::update(double dt) {   
   setPhase(_phase + _freq*2*M_PI*dt); //equals to _phase += _freq*dt  + normalize.
-}
-
-void Oscillator::interact(Swarm& syst, double dt) {
-  int size = syst.size();
-
-  double sumSinDiff = 0;
-  for (int i = 0; i < size; i++) {
-    sumSinDiff += std::sin(syst[i].phase() - _phase);   //theta_i - theta
-  }
-
-  setPhase(_phase + (_freq + syst.K()*sumSinDiff/size ) * dt);  //sarebbe  phase += ()*dt + normalize
 }
 
 std::string toString(double num) {
