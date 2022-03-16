@@ -151,7 +151,15 @@ void Swarm::draw() {
   double addFrequency = 1;  //frequency of the new added firefly
 
   sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies: " + _name);
-  window.setFramerateLimit(30);   //less lag
+  window.setFramerateLimit(30);   //less lagsf::Image icon;
+  
+  // Icon from <a href="https://www.flaticon.com/free-icons/firefly" title="firefly icons">
+  // Firefly icons created by Vitaly Gorbachev - Flaticon</a>
+  sf::Image icon;
+  if (icon.loadFromFile("fireflyIcon.png"))
+    window.setIcon(512,512,icon.getPixelsPtr());
+  else
+    std::cerr << "WARN(31): Could not load icon image. Check if icon file is in the working folder.\n";
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -256,14 +264,10 @@ void Swarm::plot() {
   int windowSize = 500;
   int radius = 1;
   int dim = windowSize + radius*2;
-
-  //create window
-  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot: " + _name);    //Deve essere non-resizable o comunque deve rimanere quadrata
-  window.setFramerateLimit(30); //less lag
-
+  
   //load font
   sf::Font arial;
-  if (!arial.loadFromFile("arial.ttf"))
+  if (!arial.loadFromFile("arial.ttf")) 
     std::cerr << "ERR(32): Couldn't load font. Check if font is present in working folder.\n";
 
   //setting background
@@ -273,10 +277,10 @@ void Swarm::plot() {
   sf::RectangleShape yAxis(sf::Vector2f(1,dim));
   yAxis.setPosition(dim/2, 0);
   yAxis.setFillColor(sf::Color(130,130,130));
-  sf::Text xText("cos θ", arial, 12);
+  sf::Text xText(L"cos θ", arial, 12);
   xText.setPosition(sf::Vector2f(dim-30, dim/2 + 10));
   xText.setFillColor(sf::Color::Black);
-  sf::Text yText("sin θ", arial, 12);
+  sf::Text yText(L"sin θ", arial, 12);
   yText.setPosition(sf::Vector2f(dim/2 -10, 30));
   yText.setFillColor(sf::Color::Black);
   yText.rotate(270);
@@ -284,6 +288,18 @@ void Swarm::plot() {
   //circle for fireflies
   sf::CircleShape circle(radius);
   circle.setFillColor(sf::Color::Black);  
+
+  //create window
+  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot: " + _name);    //Deve essere non-resizable o comunque deve rimanere quadrata
+  window.setFramerateLimit(30); //less lag
+
+  // Icon from: <a href="https://www.flaticon.com/free-icons/scatter-plot" title="scatter plot icons">
+  // Scatter plot icons created by Flowicon - Flaticon</a>
+  sf::Image icon;
+  if (icon.loadFromFile("plotIcon.png"))
+    window.setIcon(512,512,icon.getPixelsPtr());
+  else
+    std::cerr << "WARN(31): Could not load icon image. Check if icon file is in the working folder.\n";
 
   //main loop (or game loop)
   while (window.isOpen())
@@ -299,6 +315,12 @@ void Swarm::plot() {
         {
           _interaction = !_interaction;
         }
+      }
+      if (event.type == sf::Event::Resized) {
+        int smaller = event.size.height;
+        if (event.size.width < event.size.height)
+          smaller = event.size.width;
+        window.setSize(sf::Vector2u(smaller, smaller));
       }
     }
 
@@ -323,7 +345,7 @@ void Swarm::plot() {
     //draw arrow (r)
     sf::RectangleShape line(sf::Vector2f(moduleOrderParameter()*dim/2, 2));
     line.setPosition(dim/2, dim/2 +1);
-    line.setFillColor(sf::Color::Black);
+    line.setFillColor(sf::Color::Red);
     line.rotate(angleOrderParameter());
     window.draw(line);
 
