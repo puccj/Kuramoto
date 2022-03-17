@@ -21,7 +21,7 @@ Swarm::Swarm(int size, Distribution dist, TitledWindow window) : _size(size), _d
     _data[i] = Oscillator(dist, sf::Vector2f(distX(seed), distY(seed)));
   }
 
-  _Kc = 2 / M_PI* dist.evaluate(0);
+  _Kc = 2 / (M_PI* dist.evaluate(0));
 
   if (window.name == "default") {
     _window.name = std::to_string(size) + '-' + dist.toString();
@@ -341,7 +341,7 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, bool saveRT, do
   std::copy(_data, _data + _size, beginData);
   std::fstream rkOut;
   rkOut.open("./data/" + _window.name + " - r-k data.txt" , std::ios::out);
-  rkOut << "Kc = " << _Kc;
+  rkOut << "Kc = " << _Kc << '\n';
 
   //cicle throught different values of K
   for (double kValue = kMin; kValue < kMax; kValue += kIncrement) {
@@ -361,6 +361,7 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, bool saveRT, do
 
     //evolve untill time < 15 seconds
     int timeMax = 15;
+    std::cout << "Simulating K = " << kValue << '\r';
     while(time < timeMax) {
       if (timeIncrement == 0)
         dt = clock.restart().asSeconds();
@@ -387,9 +388,8 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, bool saveRT, do
       
       time += dt;
 
-      
       //print progress
-      std::cout << "Simulating K = " << kValue << "\t[";
+      /*
       int pos = barWidth * time/timeMax;
       for (int i = 0; i < barWidth; i++) {
         if (i < pos) std::cout << '=';
@@ -398,15 +398,18 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, bool saveRT, do
       }
       std::cout << "] " << int(time* 100/timeMax) << " %\r";
       std::cout.flush();
+      */
 
     } //end while
 
     //done r-t, save average |r|
     rtOut.close();
     rkOut << kValue << '\t' << sum/steps << '\n';
+
+    std::cout.flush();
     std::cout << "      Done K = " << kValue << "\t ";
-    for (int i = 0; i < barWidth; i++)
-      std::cout << ' ';
+    // for (int i = 0; i < barWidth; i++)
+    //   std::cout << ' ';
     std::cout << "      \n";
 
     //reset the system
