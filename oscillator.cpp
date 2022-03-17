@@ -1,10 +1,9 @@
 #include "oscillator.h"
 #include <vector>
 #include <random>
-#include <iostream>
-#include "swarm.h"
+//#include <iostream>
 
-using namespace std::complex_literals;
+//using namespace std::complex_literals;
 
 Distribution::Distribution(DistName name, double mean, double param) : _name{name}, _mean{mean}, _param{param} {
   if (param == 998) {
@@ -105,18 +104,7 @@ double exp_g(double freq, double mean) {  //questa che sarebbe? //Sarebbe un'esp
   return std::exp(-freq/mean) / mean;
 }*/
 
-Oscillator::Oscillator(double freq, double phase) : _freq{freq} {
-  if (phase == -1) {
-    //generate phase randomly
-    std::random_device seed;   
-    std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
-    _phase = phaseDist(seed);
-    return;
-  }
-  setPhase(phase);
-}
-
-Oscillator::Oscillator(Distribution dist) {
+Oscillator::Oscillator(Distribution dist, sf::Vector2f position) : _position{position} {
   //generate random frequency according to the selected distribution  
   double randomX;
   double randomY;
@@ -134,6 +122,13 @@ Oscillator::Oscillator(Distribution dist) {
   std::random_device seedPhase;   
   std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
   _phase = phaseDist(seedPhase);
+}
+
+Oscillator::Oscillator(double freq, sf::Vector2f position) : _freq{freq}, _position{position} {
+  //generate phase randomly
+  std::random_device seed;   
+  std::uniform_real_distribution<double> phaseDist(0, 2*M_PI);
+  _phase = phaseDist(seed);
 }
 
 void Oscillator::setPhase(double phase) {
@@ -161,3 +156,19 @@ std::string literal(bool b) {
     return "True";
   return "False";
 }
+
+/*
+std::ostream& operator<<(std::ostream& os, const sf::Vector2f& vector) {
+  os << '(' << vector.x << ", " << vector.y << ')';
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const sf::Vector2u& vector) {
+  os << '(' << vector.x << ", " << vector.y << ')';
+  return os;
+}
+
+bool operator>=(sf::Vector2f& lhs, sf::Vector2f& rhs) {
+  return lhs.x >= rhs.x || lhs.y >= rhs.y;
+}
+*/

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <random>
 
-void Swarm::interact(Firefly& chosen, double dt) {
+void Swarm::interact(Oscillator& chosen, double dt) {
   double sumSinDiff = 0;
   double phase = chosen.phase();
   for (int i = 0; i < _size; i++) {
@@ -13,51 +13,50 @@ void Swarm::interact(Firefly& chosen, double dt) {
   chosen.setPhase(phase + (chosen.freq() + _K*sumSinDiff/_size ) * dt);  //sarebbe  phase += ()*dt + normalize
 }
 
-Swarm::Swarm(int size, Distribution dist, std::string name) : _size(size), _data{new Firefly[_size]}, _name{name} {
+Swarm::Swarm(int size, Distribution dist, TitledWindow window) : _size(size), _data{new Oscillator[_size]}, _window{window} {
   for (int i = 0; i < _size; i++) {
     std::random_device seed;
-    std::uniform_int_distribution<int> distX(0, _windowDim.x);
-    std::uniform_int_distribution<int> distY(0, _windowDim.y);
-    _data[i] = Firefly(dist, sf::Vector2f(distX(seed), distY(seed)));
+    std::uniform_int_distribution<int> distX(0, _window.width);
+    std::uniform_int_distribution<int> distY(0, _window.height);
+    _data[i] = Oscillator(dist, sf::Vector2f(distX(seed), distY(seed)));
   }
 
   _Kc = 2 / M_PI* dist.evaluate(0);
 
-  if (name == "default") {
-    _name = std::to_string(size) + '-' + dist.toString();
+  if (window.name == "default") {
+    _window.name = std::to_string(size) + '-' + dist.toString();
   }
 }
 
-Swarm::Swarm(int size, double freq, std::string name) : _size{size}, _data{new Firefly[_size]}, _name{name} {
+Swarm::Swarm(int size, double freq, TitledWindow window) : _size{size}, _data{new Oscillator[_size]}, _window{window} {
   for (int i = 0; i < _size; i++) {
     std::random_device seed;
-    std::uniform_int_distribution<int> distX(0, _windowDim.x);
-    std::uniform_int_distribution<int> distY(0, _windowDim.y);
-    _data[i] = Firefly(freq, sf::Vector2f(distX(seed),distY(seed)));
+    std::uniform_int_distribution<int> distX(0, _window.width);
+    std::uniform_int_distribution<int> distY(0, _window.height);
+    _data[i] = Oscillator(freq, sf::Vector2f(distX(seed),distY(seed)));
   }
 
-  if (name == "default") {
-    _name = std::to_string(size) + '-' + std::to_string(freq) + "Hz";
+  if (window.name == "default") {
+    _window.name = std::to_string(size) + '-' + std::to_string(freq) + "Hz";
   }
 }
 
-/*Swarm::Swarm(int size, Firefly data) : _size{size}, _data{new Firefly[_size]} { 
-  std::fill(_data, _data + _size, data);
-}
-
-Swarm::Swarm(Swarm const& other) : _size{other._size}, _data{new Firefly[_size]} {
-  std::copy(other._data, other._data + _size, _data);
-}*/
-
-Firefly& Swarm::operator[](int index) {
+/*
+Oscillator& Swarm::operator[](int index) {
   if (index >= _size || index < 0) {
     std::cerr << "ERR (41): trying to access element out of bound. Exiting...\n";
     exit(0);
   }
   return _data[index];
 }
+*/
 
-std::complex<double> Swarm::orderParameter() {
+void Swarm::setWindowDim(int x, int y) {
+  _window.width = x;
+  _window.height = y;
+}
+
+Complex Swarm::orderParameter() {
   double cosAll = 0;
   double sinAll = 0;
   for(int i = 0; i < _size; ++i){
@@ -66,10 +65,14 @@ std::complex<double> Swarm::orderParameter() {
   }
   double x = cosAll/_size;
   double y = sinAll/_size;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY.
-  return std::complex<double>{x,y};
+  double mod = std::sqrt(x*x + y*y);
+  double phase = std::atan(y/x)*180/M_PI;
+  if(x < 0)
+    phase += 180;
+  return {mod,phase};
 }
 
-double Swarm::moduleOrderParameter() {
+double Swarm::orderParameter(Component component) {
   double cosAll = 0;
   double sinAll = 0;
   for(int i = 0; i < _size; ++i){
@@ -78,18 +81,10 @@ double Swarm::moduleOrderParameter() {
   }
   double x = cosAll/_size;
   double y = sinAll/_size;           //possiamo vedere la somma dei fasori come COS/N + i*SIN/N = X + iY. Da qui lo riportiamo in exp
-  return std::sqrt(x*x + y*y);
-}
-
-double Swarm::angleOrderParameter() {
-  double cosAll = 0;
-  double sinAll = 0;
-  for (int i = 0; i < _size; i++) {
-    cosAll += std::cos(_data[i].phase());
-    sinAll += std::sin(_data[i].phase());
-  }
-  double x = cosAll/_size;
-  double y = sinAll/_size;
+  
+  if(component == Component::Module)
+    return std::sqrt(x*x + y*y);
+  
   double angle = std::atan(y/x)*180/M_PI;
   if (x < 0)
     angle += 180;
@@ -103,7 +98,7 @@ void Swarm::evolve(bool saveData) {
   double time = 0;
   std::fstream fout;
   if (saveData)
-    fout.open(".\\data\\" + _name + "r-t_data.txt", std::ios::out);
+    fout.open("./data/" + _window.name + " - r-t_data.txt", std::ios::out);
 
   double dt = 0;
   while(_evolve) {    
@@ -121,7 +116,7 @@ void Swarm::evolve(bool saveData) {
 
       if (saveData) {
         //std::cout << "Saving data\n";
-        fout << time << '\t' << moduleOrderParameter() << '\n';
+        fout << time << '\t' << orderParameter(Component::Module) << '\n';
         time += dt;
       }
     }
@@ -142,15 +137,9 @@ void Swarm::draw() {
     std::cerr << "ERR(21): Couldn't load font. Check if font is present in working folder.\n";
   
   //create static text
-  sf::String staticText = "Press 'R' to add a random firefly (random position, phase and frequency).\n"; //Da fare: "according to ... distribution"
-  staticText += "Press 'S' to show/hide non-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n";
-  sf::Text text(staticText, arial, 12);
+  sf::Text text("Press 'S' to show/hide non-flashing fireflies.\nScroll mouse wheel to change dimension of fireflies.\n", arial, 12);
   
-  //variables for events managing
-  bool showOff = false;     //show/hide not-flashing (off) fireflies
-  double addFrequency = 1;  //frequency of the new added firefly
-
-  sf::RenderWindow window(sf::VideoMode(_windowDim.x, _windowDim.y), "Fireflies: " + _name);
+  sf::RenderWindow window(sf::VideoMode(_window.width, _window.height), "Fireflies: " + _window.name);
   window.setFramerateLimit(30);   //less lagsf::Image icon;
   
   // Icon from <a href="https://www.flaticon.com/free-icons/firefly" title="firefly icons">
@@ -161,9 +150,16 @@ void Swarm::draw() {
   else
     std::cerr << "WARN(31): Could not load icon image. Check if icon file is in the working folder.\n";
 
+  bool showOff = false;     //show/hide not-flashing (off) fireflies
+
   //main loop (or game loop)
   while (window.isOpen())
   {
+    //check if dimension changed:
+    if (window.getSize() != sf::Vector2u(_window.width, _window.height)) {
+      window.setSize(sf::Vector2u(_window.width, _window.height));
+    }
+
     //reacts to Events
     sf::Event event;
     while (window.pollEvent(event))
@@ -191,23 +187,6 @@ void Swarm::draw() {
         {
           _interaction = !_interaction;
         }
-
-        /*Crashes sometimes. Due to bad managing of multi threads
-        //R : add a random firefly
-        if (event.key.code == sf::Keyboard::R)    //Da fare: according to ... distribution
-        {
-          Firefly temp; //da fare: Firefly temp(dist)
-          push_back(temp);
-        }
-
-        //P / M : change frequency of added firefly
-        if (event.key.code == sf::Keyboard::P)
-          addFrequency++;
-        if (event.key.code == sf::Keyboard::M) {
-          if (addFrequency > -1)
-            addFrequency--;
-        }
-        */
       }
       
       if (window.hasFocus()) {
@@ -218,15 +197,6 @@ void Swarm::draw() {
               drawSize += event.mouseWheelScroll.delta;
           }
         }
-
-        /*Crashes sometimes. Due to bad managing of multi threads
-        //Add a fireflies 
-        if (event.type == sf::Event::MouseButtonPressed) {
-          if (event.mouseButton.button == sf::Mouse::Left) {
-            Firefly temp(addFrequency, -1, sf::Vector2f(event.mouseButton.x - drawSize, event.mouseButton.y - drawSize));
-            push_back(temp);
-          }
-        }*/
       }
     } //end react to events
 
@@ -251,7 +221,7 @@ void Swarm::draw() {
     window.draw(text);
 
     //draw dinamic (changing) text
-    sf::String dString = "\n\n\n\nPress 'I' to toggle interaction between fireflies (" + literal(_interaction) + ')';
+    sf::String dString = "\n\nPress 'I' to toggle interaction between fireflies (" + literal(_interaction) + ')';
     sf::Text dText(dString, arial,12);
     window.draw(dText);
 
@@ -264,7 +234,7 @@ void Swarm::plot() {
   int windowSize = 500;
   int radius = 1;
   int dim = windowSize + radius*2;
-  
+
   //load font
   sf::Font arial;
   if (!arial.loadFromFile("arial.ttf")) 
@@ -290,7 +260,7 @@ void Swarm::plot() {
   circle.setFillColor(sf::Color::Black);  
 
   //create window
-  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot: " + _name);    //Deve essere non-resizable o comunque deve rimanere quadrata
+  sf::RenderWindow window(sf::VideoMode(dim, dim), "Plot: " + _window.name);    //Deve essere non-resizable o comunque deve rimanere quadrata
   window.setFramerateLimit(30); //less lag
 
   // Icon from: <a href="https://www.flaticon.com/free-icons/scatter-plot" title="scatter plot icons">
@@ -337,25 +307,26 @@ void Swarm::plot() {
       window.draw(circle);
     }
 
+    Complex r = orderParameter();
+
     //draw text
-    sf::Text text("Order parameter: |r| = " + std::to_string(moduleOrderParameter()),arial,12);
+    sf::Text text("Order parameter: |r| = " + std::to_string(orderParameter().mod),arial,12);
     text.setFillColor(sf::Color::Black);
     window.draw(text);
 
     //draw arrow (r)
-    sf::RectangleShape line(sf::Vector2f(moduleOrderParameter()*dim/2, 2));
+    sf::RectangleShape line(sf::Vector2f(orderParameter().mod*dim/2, 2));
     line.setPosition(dim/2, dim/2 +1);
     line.setFillColor(sf::Color::Red);
-    line.rotate(angleOrderParameter());
+    line.rotate(orderParameter().phase);
     window.draw(line);
 
     //refresh display
     window.display();
   }
-
 }
 
-void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFactor, bool saveRT) {
+void Swarm::rkGraph(double kMin, double kMax, double kIncrement, bool saveRT, double timeIncrement) {
   _interaction = true;
 
   if (kMin > kMax) {
@@ -366,15 +337,17 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
   }
 
   //copy the begin state of the system before evolving it and preparing the file
-  Swarm beginSyst = *this;
+  Oscillator beginData[_size];
+  std::copy(_data, _data + _size, beginData);
   std::fstream rkOut;
-  rkOut.open(".\\data\\" + _name + "r-k data.txt" , std::ios::out);
+  rkOut.open("./data/" + _window.name + " - r-k data.txt" , std::ios::out);
+  rkOut << "Kc = " << _Kc;
 
-  //cicle throw different values of K
+  //cicle throught different values of K
   for (double kValue = kMin; kValue < kMax; kValue += kIncrement) {
     std::fstream rtOut;
     if (saveRT)
-      rtOut.open(".\\data\\" + _name + "r-t_data(K=" + std::to_string(kValue) + ").txt", std::ios::out);
+      rtOut.open("./data/" + _window.name + " - r-t_data(K=" + std::to_string(kValue) + ").txt", std::ios::out);
 
     setK(kValue);
     sf::Clock clock;
@@ -383,35 +356,61 @@ void Swarm::rkGraph(double kMin, double kMax, double kIncrement, double speedFac
     double sum = 0;
     double steps = 0;
 
-    //evolve untill time < 12
-    while(time < 12) {
-      dt = clock.restart().asSeconds() *speedFactor;
+    //width of progress bar
+    int barWidth = 70;
+
+    //evolve untill time < 15 seconds
+    int timeMax = 15;
+    while(time < timeMax) {
+      if (timeIncrement == 0)
+        dt = clock.restart().asSeconds();
+      else
+        dt = timeIncrement;
+
       for (int i = 0; i < _size; i++)    //update
         _data[i].Oscillator::update(dt); 
       for (int i = 0; i < _size; i++)    //interact
-        interact(_data[i], dt);   
-      time += dt;
+        interact(_data[i], dt);
 
-      //average values of K from time=6 to time=12
-      if (time > 6) {
-        sum += moduleOrderParameter();
+      double r = orderParameter(Component::Module);
+
+      //average values of K from time=12 to time=15
+      if (time > timeMax*4/5) {
+        sum += r;
         steps++;
       }
 
       if (saveRT) {
         //std::cout << "Saving data\n";
-        rtOut << time << '\t' << moduleOrderParameter() << '\n';
-        time += dt;
+        rtOut << time << '\t' << r << '\n';
       }
+      
+      time += dt;
+
+      
+      //print progress
+      std::cout << "Simulating K = " << kValue << "\t[";
+      int pos = barWidth * time/timeMax;
+      for (int i = 0; i < barWidth; i++) {
+        if (i < pos) std::cout << '=';
+        else if (i == pos) std::cout << '>';
+        else std::cout << ' ';
+      }
+      std::cout << "] " << int(time* 100/timeMax) << " %\r";
+      std::cout.flush();
+
     } //end while
 
     //done r-t, save average |r|
     rtOut.close();
     rkOut << kValue << '\t' << sum/steps << '\n';
-    std::cout << "Done K = " << kValue << '\n';
+    std::cout << "      Done K = " << kValue << "\t ";
+    for (int i = 0; i < barWidth; i++)
+      std::cout << ' ';
+    std::cout << "      \n";
 
     //reset the system
-    *this = beginSyst;
+    std::copy(beginData, beginData + _size, _data);
   }
   rkOut.close();
   std::cout << "r-k data saved\n";
