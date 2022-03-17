@@ -1,3 +1,6 @@
+main.o
+oscillator.o
+swarm.o
 data/1000-Exp,2.000000,988.000000 - r-k data.txt
 data/1000-Exp,2.000000,988.000000 - r-t_data.txt
 data/1000-Exp,2.000000,988.000000 - r-t_data(K=10.000000).txt
